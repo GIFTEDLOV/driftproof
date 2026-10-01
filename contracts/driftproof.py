@@ -458,7 +458,30 @@ class DriftProof(gl.contract.Contract):
         self._require_creator(guard)
         if guard.get("state") != DRAFT:
             _fail("BASELINE_ALREADY_FROZEN")
-        retrieved = _retrieve_document(guard, 0)
+        def leader() -> dict[str, typing.Any]:
+            return _retrieve_document(guard, 0)
+
+        def validator(leader_result: typing.Any) -> bool:
+            if not isinstance(leader_result, gl.vm.Return):
+                return False
+            try:
+                independent = _retrieve_document(guard, 0)
+                left = leader_result.calldata
+                right = independent
+                if left.get("technical_status") != right.get("technical_status"):
+                    return False
+                left_evidence = left.get("evidence", {})
+                right_evidence = right.get("evidence", {})
+                return all(
+                    left_evidence.get(key) == right_evidence.get(key)
+                    for key in ("content_sha256", "exact_byte_length", "content")
+                )
+            except Exception:
+                return False
+
+        retrieved = gl.vm.run_nondet(leader, validator)
+        if not isinstance(retrieved, dict):
+            _fail("MALFORMED_BASELINE_RETRIEVAL")
         if retrieved["technical_status"] != OK:
             _fail(str(retrieved["technical_status"]))
         evidence = typing.cast(dict[str, typing.Any], retrieved["evidence"])
