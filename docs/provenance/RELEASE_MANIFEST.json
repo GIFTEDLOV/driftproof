@@ -6,12 +6,18 @@
   "max_document_bytes": 16384,
   "target_network": "Studio-dev",
   "target_chain_id": 61997,
-  "deployment_status": "not_deployed",
+  "deployment_status": "not_deployed_failed_fee_validation",
   "github_status": "not_created_or_pushed",
-  "contract_sha256": "a0956800f9c721804b56a6457e3836e76f13dd208170b3ae72479204abe78ba5",
-  "git_blob_sha256": "a0956800f9c721804b56a6457e3836e76f13dd208170b3ae72479204abe78ba5",
-  "git_object_sha1": "2f9b69e0b9dca0c1282b9cf033b5f7cb7375cea7",
+  "contract_sha256": "01502a22acc06f400136bc837899c87c79c4b1858cfd106d956ceae82889a544",
+  "git_blob_sha256": "01502a22acc06f400136bc837899c87c79c4b1858cfd106d956ceae82889a544",
+  "git_object_sha1": "c3bf45c3c6c42a71ec2de218476ac03b6fdd617a",
   "source_reproducible": true,
+  "failed_deployment": {
+    "tx_hash": "0x5297032368b68291e0b82784a4f860b8e9bc64f7b53bd8d89fcd42b8a8960d78",
+    "nonce": 120,
+    "revert": "FeeValueMustBeNonZero(1)",
+    "forensics": "docs/provenance/FAILED_DEPLOYMENT_FEE_FORENSICS.json"
+  },
   "gates": {
     "contract_tests": "pass",
     "adversarial_tests": "pass",

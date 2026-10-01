@@ -4,7 +4,7 @@ DriftProof is a standalone GenLayer Intelligent Contract submission for semantic
 
 ## Status
 
-This repository is a local release-candidate deployment candidate for Studio-dev (chain ID 61997). It has not been deployed, is not live or production, and contains no blockchain writes.
+This repository is a local release-candidate deployment candidate for Studio-dev (chain ID 61997). No contract was successfully deployed and it is not live or production. One prior deployment submission reverted during protocol fee validation; it is permanently recorded in `docs/provenance/FAILED_DEPLOYMENT_FEE_FORENSICS.json`. This forensic run made no blockchain writes.
 
 ## Problem and trust model
 
@@ -38,5 +38,4 @@ The test program includes direct behavior tests, adversarial URL/schema/prompt-i
 
 ## Deployment status
 
-No GitHub repository has been created or pushed. No Studio-dev deployment has been performed. The next authorized step is a Studio-dev deployment using the frozen source hash and the procedure in `docs/DEPLOYMENT.md`.
-
+No GitHub repository has been created or pushed. No successful Studio-dev deployment exists. The next authorized step is a separately approved deployment using the frozen source hash, the complete fee distribution, and the procedure in `docs/DEPLOYMENT.md`.

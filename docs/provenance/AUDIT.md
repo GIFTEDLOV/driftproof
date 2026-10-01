@@ -14,6 +14,6 @@ Audit scope was performed against the first implementation before release-candid
 | DP-008 | High | UTF-8 character count could under-bound byte content. | All bounds use encoded UTF-8 bytes; mutation test kills character-count weakening. |
 | DP-009 | Medium | Extra semantic fields could smuggle a model verdict. | Exact key-set validation rejects extras; schema adversarial tests pass. |
 | DP-010 | Medium | Non-2xx or out-of-authority effective URLs could be stored as evidence. | Retrieval classifies failures and rechecks final URL authority; redirect/status tests pass. |
+| DP-011 | High | The first Studio-dev deployment path supplied only `feeValue`; the v0.6 SDK filled the omitted distribution with zero defaults and the consensus call reverted before contract creation. | Raw transaction/receipt, command path, zero-filled reconstruction, and complete estimator output are recorded in `FAILED_DEPLOYMENT_FEE_FORENSICS.json`; no contract source change was made. |
 
 Residual risks are listed in the final response and are not silently treated as solved by offline tests.
-
