@@ -1,0 +1,114 @@
+{
+  "schema": "DRIFTPROOF_STUDIO_DEV_PREFLIGHT_V1",
+  "project": "DriftProof",
+  "date": "2026-10-01",
+  "starting_head": "a7e9312f29328d36c462b6be4973cd52c0a004d5",
+  "contract": {
+    "path": "contracts/driftproof.py",
+    "sha256": "a0956800f9c721804b56a6457e3836e76f13dd208170b3ae72479204abe78ba5",
+    "git_blob_sha1": "2f9b69e0b9dca0c1282b9cf033b5f7cb7375cea7",
+    "working_bytes_equal_git_blob_bytes": true,
+    "header": "# { \"Depends\": \"py-genlayer:latest\" }",
+    "semantic_change": false
+  },
+  "network": {
+    "alias": "studio-dev",
+    "rpc": "https://studio-dev.genlayer.com/api",
+    "chain_id": 61997,
+    "recognized_by_cli": true,
+    "rpc_chain_id": "0xf22d",
+    "rpc_network_id": "61997"
+  },
+  "toolchain": {
+    "python": "3.14.3",
+    "node": "v24.14.0",
+    "npm": "11.9.0",
+    "git": "2.53.0.windows.2",
+    "genlayer_cli": "0.40.0-rc.3",
+    "genlayer_py": "0.19.0rc2",
+    "genlayer_test": "0.30.0rc2",
+    "genvm_linter": "0.11.0",
+    "pyright": "1.1.414",
+    "pytest": "8.3.3",
+    "web3": "8.0.0",
+    "repo_local_venv": ".venv",
+    "official_rc_sources": {
+      "genlayer_py": "https://github.com/genlayerlabs/genlayer-py/tree/v0.19.0-rc.2",
+      "genlayer_test": "https://github.com/genlayerlabs/genlayer-testing-suite/tree/v0.30.0-rc.2"
+    },
+    "genvm_runtime": {
+      "explicit_cached_target": "v0.6.0-rc5",
+      "explicit_cached_target_status": "NOT_AVAILABLE",
+      "reason": "genvm-linter 0.11.0 could not load the cached v0.6 runner bundle: missing extracted py-genlayer archive member; rc2 cache loads but lacks genlayer.py",
+      "fallback_installed_root": "C:/Users/DELL/CharterLock-genvmroot-phase45",
+      "fallback_version_metadata": "unavailable"
+    }
+  },
+  "runner": {
+    "header": "py-genlayer:latest",
+    "compatible_with_installed_validation_root": true,
+    "contract_semantics_changed": false
+  },
+  "schema": {
+    "public_methods": 11,
+    "views": 8,
+    "writes": 3,
+    "constructor_parameters": 0,
+    "parity_with_checked_in_schema": true,
+    "method_set_exact": true
+  },
+  "tests": {
+    "direct": 61,
+    "adversarial": 62,
+    "property_state_machine": 44,
+    "mutation": "26/26 killed",
+    "full_pytest": "PASS",
+    "selected_network_for_tests": "localnet (offline regression; no Studio-dev writes)"
+  },
+  "validation": {
+    "python_compile": "PASS",
+    "pyright": "PASS (direct invocation with installed GenLayer SDK source path)",
+    "genvm_lint": "PASS",
+    "genvm_validate": "PASS (installed validation root)",
+    "genvm_typecheck_native": "NOT_AVAILABLE (cached v0.6 SDK extraction failure)",
+    "semantic_validation": "PASS (genvm-lint validate)",
+    "schema_check": "PASS",
+    "secret_scan": "PASS",
+    "web_api_compatibility": "PASS (current installed runtime exports every used API)"
+  },
+  "read_only_deployment_preflight": {
+    "active_account_name": "agentpact-requester",
+    "deployer": "0x61f10cc252ed98ce7596c73fc557cca4cc600c82",
+    "balance_gen": "0.211684273799447668",
+    "nonce_latest": 120,
+    "nonce_pending": 120,
+    "fee_policy": {
+      "enabled": true,
+      "gen_per_time_unit": "1",
+      "storage_unit_price": "250000000",
+      "receipt_gas_price": "250000000",
+      "intrinsic_gas": "21000",
+      "bootloader_overhead": "60000",
+      "min_propose_timeunits": "30",
+      "max_propose_timeunits": "600"
+    },
+    "estimated_deployment_fee_value_wei": "100000000000010352",
+    "required_fee_value_wei": "100000000000010352",
+    "contract_value_wei": "0",
+    "broadcast": false
+  },
+  "source_reproducibility": {
+    "worktree_clean_at_capture": true,
+    "working_contract_sha256": "a0956800f9c721804b56a6457e3836e76f13dd208170b3ae72479204abe78ba5",
+    "git_blob_bytes_sha256": "a0956800f9c721804b56a6457e3836e76f13dd208170b3ae72479204abe78ba5",
+    "match": true
+  },
+  "github": {
+    "created": false,
+    "pushed": false
+  },
+  "deployment_status": "NOT_DEPLOYED",
+  "blockers": [
+    "Native genvm-lint typecheck/explicit v0.6 SDK extraction is unavailable until the cached v0.6 runner bundle is repaired or a matching official artifact is installed."
+  ]
+}
