@@ -1,0 +1,14 @@
+{
+  "schema": "DRIFTPROOF_MUTATION_AUDIT_V1",
+  "target": 25,
+  "mutants": [
+    "https_only", "reject_ftp", "reject_credentials", "reject_unexpected_port", "reject_fragments",
+    "exact_authority_host", "no_suffix_host_attack", "path_boundary", "path_traversal", "encoded_traversal",
+    "sha_length_short", "sha_hex_only", "sha_prefix_rejected", "byte_bound_utf8", "baseline_frozen_flag",
+    "baseline_state_guard", "generation_strictly_increases", "generation_not_replayed", "extra_key_rejected",
+    "missing_key_rejected", "string_bool_rejected", "prompt_data_boundary", "evidence_false_not_no_change",
+    "source_failure_separate", "protected_dimension_derivation", "duplicate_key_guard"
+  ],
+  "status": "pending-final-test-run"
+}
+

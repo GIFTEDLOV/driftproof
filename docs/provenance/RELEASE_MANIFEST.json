@@ -1,0 +1,27 @@
+{
+  "project": "DriftProof",
+  "release_candidate": "0.1.0-rc1",
+  "contract": "contracts/driftproof.py",
+  "semantic_schema": "DRIFTPROOF_SEMANTIC_V1",
+  "max_document_bytes": 16384,
+  "target_network": "Studio-dev",
+  "target_chain_id": 61997,
+  "deployment_status": "not_deployed",
+  "github_status": "not_created_or_pushed",
+  "contract_sha256": "",
+  "git_blob_sha256": "",
+  "source_reproducible": false,
+  "gates": {
+    "contract_tests": "pending",
+    "adversarial_tests": "pending",
+    "property_tests": "pending",
+    "mutation_tests": "pending",
+    "python_compile": "pending",
+    "pyright": "pending",
+    "genvm_lint": "pending",
+    "semantic_validation": "pending",
+    "schema_check": "pending",
+    "secret_scan": "pending"
+  }
+}
+
