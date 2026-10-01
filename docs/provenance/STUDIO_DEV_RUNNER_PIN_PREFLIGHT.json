@@ -1,0 +1,72 @@
+{
+  "schema": "DRIFTPROOF_STUDIO_DEV_RUNNER_PIN_PREFLIGHT_V1",
+  "project": "DriftProof",
+  "date": "2026-10-01",
+  "starting_head": "e738f2b39fcbf197ad2ea33175998eeca4326214",
+  "network": {
+    "alias": "studio-dev",
+    "rpc": "https://studio-dev.genlayer.com/api",
+    "chain_id": 61997,
+    "cli_recognized": true,
+    "rpc_chain_id": "0xf22d",
+    "rpc_network_id": "61997"
+  },
+  "runner": {
+    "before": "py-genlayer:latest",
+    "after": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng",
+    "pinned_hash": "5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng",
+    "pin_source": "Official genvm-manager v0.6.0-rc6 release metadata and extracted py-genlayer runner.json",
+    "official_release": "https://github.com/genlayerlabs/genvm-manager/releases/tag/v0.6.0-rc6",
+    "v06_compatibility": "PASS: v0.6.0-rc6 runner uses _genlayer_bootloader.py and the v0.6 py-lib-genlayer-std dependency; the other cached py-genlayer hash is the legacy v0.3 wrapper",
+    "contract_logic_changed": false
+  },
+  "contract": {
+    "path": "contracts/driftproof.py",
+    "sha256": "01502a22acc06f400136bc837899c87c79c4b1858cfd106d956ceae82889a544"
+  },
+  "schema": {
+    "public_methods": 11,
+    "views": 8,
+    "writes": 3,
+    "constructor_parameters": 0,
+    "parity": true
+  },
+  "tests": {
+    "direct": 61,
+    "adversarial": 62,
+    "property_state_machine": 44,
+    "mutation": "26/26 killed",
+    "full_regression": "PASS"
+  },
+  "validation": {
+    "python_compile": "PASS",
+    "pyright": "PASS against extracted v0.6 SDK source",
+    "genvm_lint": "PASS",
+    "genvm_validate": "PASS against installed validation root; explicit pinned-runner archive loading remains unavailable locally",
+    "genvm_check": "PASS against installed validation root",
+    "genvm_typecheck": "NOT_AVAILABLE_LOCAL_CACHE",
+    "genvm_typecheck_reason": "Known linter cache defect: missing outer-tar member runners/py-genlayer/5j/ycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng.tar; no contract/type diagnostic",
+    "semantic_validation": "PASS",
+    "schema_check": "PASS",
+    "secret_scan": "PASS",
+    "web_api_compatibility": "PASS against pinned v0.6 SDK exports"
+  },
+  "read_only_deployment_preflight": {
+    "deployer_name": "agentpact-requester",
+    "deployer": "0x61f10cc252ed98ce7596c73fc557cca4cc600c82",
+    "balance_gen": "0.211684273799447668",
+    "nonce_latest": 120,
+    "nonce_pending": 120,
+    "fee_policy_enabled": true,
+    "estimated_deploy_fee_value_wei": "100000000000010352",
+    "required_fee_value_wei": "100000000000010352",
+    "contract_value_wei": "0",
+    "broadcast": false
+  },
+  "source_reproducibility": {
+    "checked_after_commit": true,
+    "working_bytes_equal_git_blob_bytes": true
+  },
+  "github_pushed": false,
+  "deployment_broadcast": false
+}
