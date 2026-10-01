@@ -8,20 +8,20 @@
   "target_chain_id": 61997,
   "deployment_status": "not_deployed",
   "github_status": "not_created_or_pushed",
-  "contract_sha256": "",
-  "git_blob_sha256": "",
-  "source_reproducible": false,
+  "contract_sha256": "a0956800f9c721804b56a6457e3836e76f13dd208170b3ae72479204abe78ba5",
+  "git_blob_sha256": "a0956800f9c721804b56a6457e3836e76f13dd208170b3ae72479204abe78ba5",
+  "git_object_sha1": "2f9b69e0b9dca0c1282b9cf033b5f7cb7375cea7",
+  "source_reproducible": true,
   "gates": {
-    "contract_tests": "pending",
-    "adversarial_tests": "pending",
-    "property_tests": "pending",
-    "mutation_tests": "pending",
-    "python_compile": "pending",
-    "pyright": "pending",
-    "genvm_lint": "pending",
-    "semantic_validation": "pending",
-    "schema_check": "pending",
-    "secret_scan": "pending"
+    "contract_tests": "pass",
+    "adversarial_tests": "pass",
+    "property_tests": "pass",
+    "mutation_tests": "all_killed",
+    "python_compile": "pass",
+    "pyright": "pass_with_installed_genvm_sdk_path",
+    "genvm_lint": "pass",
+    "semantic_validation": "pass",
+    "schema_check": "pass",
+    "secret_scan": "pass"
   }
 }
-

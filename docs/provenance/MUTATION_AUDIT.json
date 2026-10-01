@@ -1,6 +1,6 @@
 {
   "schema": "DRIFTPROOF_MUTATION_AUDIT_V1",
-  "target": 25,
+  "target": 26,
   "mutants": [
     "https_only", "reject_ftp", "reject_credentials", "reject_unexpected_port", "reject_fragments",
     "exact_authority_host", "no_suffix_host_attack", "path_boundary", "path_traversal", "encoded_traversal",
@@ -9,6 +9,5 @@
     "missing_key_rejected", "string_bool_rejected", "prompt_data_boundary", "evidence_false_not_no_change",
     "source_failure_separate", "protected_dimension_derivation", "duplicate_key_guard"
   ],
-  "status": "pending-final-test-run"
+  "status": "all_26_killed"
 }
-
