@@ -6,17 +6,40 @@
   "max_document_bytes": 16384,
   "target_network": "Studio-dev",
   "target_chain_id": 61997,
-  "deployment_status": "not_deployed_failed_fee_validation",
+  "deployment_status": "deployed_readback_verified_signer_mismatch",
   "github_status": "not_created_or_pushed",
-  "contract_sha256": "01502a22acc06f400136bc837899c87c79c4b1858cfd106d956ceae82889a544",
-  "git_blob_sha256": "01502a22acc06f400136bc837899c87c79c4b1858cfd106d956ceae82889a544",
-  "git_object_sha1": "c3bf45c3c6c42a71ec2de218476ac03b6fdd617a",
+  "contract_sha256": "82d2f653dde89c8b44176e696f970563f34502f14622151f669251c912cf6e0b",
+  "git_blob_sha1": "f9786133c4098364ace1965aa0d9cf35e0b67014",
   "source_reproducible": true,
-  "failed_deployment": {
+  "failed_deployments": [
+    {
     "tx_hash": "0x5297032368b68291e0b82784a4f860b8e9bc64f7b53bd8d89fcd42b8a8960d78",
     "nonce": 120,
     "revert": "FeeValueMustBeNonZero(1)",
     "forensics": "docs/provenance/FAILED_DEPLOYMENT_FEE_FORENSICS.json"
+    },
+    {
+      "tx_hash": "0x797e6a936855695ec088b993d17b26b89e22b3d6b9560e255fe8484b05745dad",
+      "nonce": 121,
+      "result": "FINISHED_WITH_ERROR",
+      "error": "invalid_contract runner malformed",
+      "cause": "unterminated runner header comment"
+    }
+  ],
+  "deployment": {
+    "number": 3,
+    "tx_hash": "0xc6b1fed8ae8e20b89a7a1a805bb8cf009d0f865fb073cce14b4fa5e2b2c0aff0",
+    "contract_address": "0xf7D72f3736A570559900F6eDec9424ac4Ad81992",
+    "network": "studio-dev",
+    "chain_id": 61997,
+    "authorized_deployer": "0x61f10cc252ed98ce7596c73fc557cca4cc600c82",
+    "observed_sender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "nonce_observed_on_authorized_account": 126,
+    "execution_result": "FINISHED_WITH_RETURN",
+    "schema": {"public_methods": 11, "views": 8, "writes": 3},
+    "source_parity": "verified",
+    "live_qualification": "PENDING",
+    "signer_authorization": "MISMATCH"
   },
   "gates": {
     "contract_tests": "pass",

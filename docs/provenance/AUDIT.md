@@ -15,5 +15,6 @@ Audit scope was performed against the first implementation before release-candid
 | DP-009 | Medium | Extra semantic fields could smuggle a model verdict. | Exact key-set validation rejects extras; schema adversarial tests pass. |
 | DP-010 | Medium | Non-2xx or out-of-authority effective URLs could be stored as evidence. | Retrieval classifies failures and rechecks final URL authority; redirect/status tests pass. |
 | DP-011 | High | The first Studio-dev deployment path supplied only `feeValue`; the v0.6 SDK filled the omitted distribution with zero defaults and the consensus call reverted before contract creation. | Raw transaction/receipt, command path, zero-filled reconstruction, and complete estimator output are recorded in `FAILED_DEPLOYMENT_FEE_FORENSICS.json`; no contract source change was made. |
+| DP-012 | Critical | Deployment #3 executed successfully, but the observed sender was `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266` rather than the authorized deployer `0x61f10cc252ed98ce7596c73fc557cca4cc600c82`. | Deployment hash, sender, unchanged authorized-account nonce, source parity, schema, and readback are recorded in `STUDIO_DEV_DEPLOYMENT.md`; no additional transaction was sent. |
 
 Residual risks are listed in the final response and are not silently treated as solved by offline tests.

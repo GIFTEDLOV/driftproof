@@ -4,7 +4,7 @@ DriftProof is a standalone GenLayer Intelligent Contract submission for semantic
 
 ## Status
 
-This repository is a local release-candidate deployment candidate for Studio-dev (chain ID 61997). No contract was successfully deployed and it is not live or production. One prior deployment submission reverted during protocol fee validation; it is permanently recorded in `docs/provenance/FAILED_DEPLOYMENT_FEE_FORENSICS.json`. This forensic run made no blockchain writes.
+This repository contains a Studio-dev deployment with successful execution and readback verification at `0xf7D72f3736A570559900F6eDec9424ac4Ad81992` (chain ID 61997). Live semantic qualification is still pending, and this is not a production claim. The deployment transaction was signed by the CLI-configured account `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266`, which differs from the authorized DriftProof deployer recorded in the release procedure; that signer discrepancy is preserved as a critical operational finding. Earlier failed submissions remain permanently recorded in `docs/provenance/`.
 
 ## Problem and trust model
 
@@ -38,4 +38,4 @@ The test program includes direct behavior tests, adversarial URL/schema/prompt-i
 
 ## Deployment status
 
-No GitHub repository has been created or pushed. No successful Studio-dev deployment exists. The next authorized step is a separately approved deployment using the frozen source hash, the complete fee distribution, and the procedure in `docs/DEPLOYMENT.md`.
+DriftProof is deployed on Studio-dev at `0xf7D72f3736A570559900F6eDec9424ac4Ad81992`. `contract_info`, initial guard state, deployed schema, and submitted source-byte hash were verified. No qualification writes were performed; `LIVE_QUALIFICATION=PENDING`. No GitHub repository has been created or pushed. See `docs/provenance/STUDIO_DEV_DEPLOYMENT.md` for the full chronology and signer discrepancy.
