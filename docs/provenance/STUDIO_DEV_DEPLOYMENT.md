@@ -61,7 +61,7 @@ The authorized account remained at nonce `126/126` after deployment. The CLI key
 `QUALIFICATION_WRITES=0`  
 `GITHUB_PUSHED=NO`
 
-## Undeployed runtime-fix candidate
+## Deployment #4 runtime-fix deployment
 
 - Candidate version: `0.1.1-rc1`
 - Candidate source SHA-256: `dd99595a3cb50392b4ec991b7ccb3f2ffa275fc77e14cac5628ed75a4a3aca99`
@@ -69,9 +69,28 @@ The authorized account remained at nonce `126/126` after deployment. The CLI key
 - Semantic schema: unchanged, `DRIFTPROOF_SEMANTIC_V1`
 - ABI: unchanged, 11 public methods / 8 views / 3 writes
 - Deployment #3: preserved as the deployed `0.1.0-rc1` artifact; cannot be patched in place.
-- Deployment #4: not authorized and not performed.
-- Live qualification: pending; no success is claimed.
+- Deployment #4: completed under separate authorization.
+- Live qualification: pending; no qualification success is claimed.
 
 The candidate preserves the two historical qualification failures, including
 `SOURCE_UNAVAILABLE` for `GUA-00000001` and the read-only freeze estimate
 failure for `GUA-00000002`.
+
+## Deployment #4 reconciliation record
+
+- Candidate SHA-256: `dd99595a3cb50392b4ec991b7ccb3f2ffa275fc77e14cac5628ed75a4a3aca99`
+- Runner: `py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng`
+- Signer/account: `agentpact-requester` / `0x61f10cc252ed98ce7596c73fc557cca4cc600c82`
+- Nonce: `142`
+- Transaction hash: `0x677637386b8a465fe57f07f1eb07ab181c2c0bf065484c4dff7aef490df3828a`
+- Fee value: `100000000000010352`
+- Fee distribution: authorized complete deployment preset
+- Contract: `0x52f6B57373DE9677b5Fc883B59CA4cc3a257B4a1`
+- Execution: `FINISHED_WITH_RETURN`
+- Lifecycle: `Finalized`
+- Stored status code: `7`
+- Schema: 11 public methods / 8 views / 3 writes
+- Contract info: `DriftProof`, `0.1.1-rc1`, `DRIFTPROOF_SEMANTIC_V1`, 16384 max document bytes
+- Initial guard count: `0`
+- Initial guard IDs: `[]`
+- Source parity: submitted transaction source bytes SHA-256 verified

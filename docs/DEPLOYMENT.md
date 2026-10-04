@@ -26,12 +26,20 @@ Before any separately authorized deployment:
 
 Current state: contract deployment and readback succeeded, but the observed transaction sender differs from the authorized deployer. No qualification writes were performed.
 
-## Runtime-fix candidate
+## Deployment #4 runtime-fix deployment
 
-The repository now contains an undeployed `0.1.1-rc1` candidate with source
-SHA-256 `dd99595a3cb50392b4ec991b7ccb3f2ffa275fc77e14cac5628ed75a4a3aca99`.
+Deployment #4 completed with source SHA-256
+`dd99595a3cb50392b4ec991b7ccb3f2ffa275fc77e14cac5628ed75a4a3aca99`.
 It removes the unnecessary `sign=True` option from public evidence retrieval;
 authority, HTTPS, redirect, byte-limit, UTF-8, digest, semantic, and lifecycle
-controls are unchanged. Deployment #3 remains the canonical historical
-deployment and cannot be patched in place. A future Deployment #4 requires
-explicit authorization and has not occurred.
+controls are unchanged.
+
+- Transaction: `0x677637386b8a465fe57f07f1eb07ab181c2c0bf065484c4dff7aef490df3828a`
+- Contract: `0x52f6B57373DE9677b5Fc883B59CA4cc3a257B4a1`
+- Sender: authorized `agentpact-requester` (`0x61f10cc252ed98ce7596c73fc557cca4cc600c82`)
+- Nonce: `142`
+- Execution: `FINISHED_WITH_RETURN`
+- Status: `Finalized`
+
+Deployment #3 remains preserved as the prior historical deployment. Live
+qualification is still pending.

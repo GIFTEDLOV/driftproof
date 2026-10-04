@@ -6,10 +6,11 @@
   "max_document_bytes": 16384,
   "target_network": "Studio-dev",
   "target_chain_id": 61997,
-  "deployment_status": "deployed_readback_verified_signer_mismatch_candidate_pending",
+  "deployment_status": "deployment_4_readback_verified_live_qualification_pending",
   "github_status": "not_created_or_pushed",
   "contract_sha256": "dd99595a3cb50392b4ec991b7ccb3f2ffa275fc77e14cac5628ed75a4a3aca99",
-  "deployed_contract_sha256": "82d2f653dde89c8b44176e696f970563f34502f14622151f669251c912cf6e0b",
+  "deployed_contract_sha256": "dd99595a3cb50392b4ec991b7ccb3f2ffa275fc77e14cac5628ed75a4a3aca99",
+  "historical_deployment_3_contract_sha256": "82d2f653dde89c8b44176e696f970563f34502f14622151f669251c912cf6e0b",
   "git_blob_sha1": "8289069b4b41ff7746c706b8bed74136784a891a",
   "source_reproducible": true,
   "failed_deployments": [
@@ -42,6 +43,29 @@
     "live_qualification": "PENDING",
     "signer_authorization": "MISMATCH"
   },
+  "deployment_4": {
+    "number": 4,
+    "tx_hash": "0x677637386b8a465fe57f07f1eb07ab181c2c0bf065484c4dff7aef490df3828a",
+    "contract_address": "0x52f6B57373DE9677b5Fc883B59CA4cc3a257B4a1",
+    "network": "studio-dev",
+    "chain_id": 61997,
+    "authorized_deployer": "0x61f10cc252ed98ce7596c73fc557cca4cc600c82",
+    "observed_sender": "0x61F10Cc252eD98Ce7596c73fC557cCA4cc600c82",
+    "nonce": 142,
+    "fee_value": "100000000000010352",
+    "execution_result": "FINISHED_WITH_RETURN",
+    "stored_status": "Finalized",
+    "schema": {"public_methods": 11, "views": 8, "writes": 3},
+    "contract_info": {
+      "name": "DriftProof",
+      "version": "0.1.1-rc1",
+      "semantic_schema": "DRIFTPROOF_SEMANTIC_V1",
+      "max_document_bytes": 16384,
+      "guard_count": 0
+    },
+    "source_parity": "submitted_source_sha256_verified",
+    "live_qualification": "PENDING"
+  },
   "qualification_history": [
     {
       "attempt": 1,
@@ -68,7 +92,8 @@
     "change": "omit sign=True from public gl.nondet.web.get",
     "semantic_schema_changed": false,
     "abi_changed": false,
-    "deployment_authorized": false,
+    "deployment_authorized": true,
+    "deployed": true,
     "deployment_number": 4
   },
   "gates": {
