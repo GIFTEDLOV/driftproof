@@ -12,6 +12,7 @@ Critical findings addressed by construction are baseline replacement, arbitrary 
 - SHA-256 values must be exactly 64 hexadecimal characters and are normalized to lowercase.
 - Model output must be a JSON object with exactly eight keys whose values are native booleans. Missing, extra, nested, null, string-boolean, oversized, or malformed output is rejected.
 - Both document bodies are explicitly marked untrusted data in the prompt. Embedded instructions are not executable instructions.
+- Public evidence retrieval uses the SDK's default unsigned GET path. This does not weaken source binding: HTTPS, complete host equality, path-prefix rules, redirect checks, exact SHA-256, exact UTF-8 byte length, and validator-independent retrieval remain enforced. HTTP request signing would authenticate a request to an operator signer, not the public document itself.
 
 ## Failure separation
 
@@ -20,4 +21,3 @@ Network/DNS/timeout/non-2xx failures become `SOURCE_UNAVAILABLE`. Redirect, auth
 ## Audit discipline
 
 The independent red-team record is in `docs/provenance/AUDIT.md`; mutation evidence is in `docs/provenance/MUTATION_AUDIT.json`. Findings are recorded before fixes and the release checks are rerun after fixes.
-

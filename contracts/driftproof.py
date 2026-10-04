@@ -24,7 +24,7 @@ u256 = gl.u256
 
 
 NAME = "DriftProof"
-VERSION = "0.1.0-rc1"
+VERSION = "0.1.1-rc1"
 SEMANTIC_SCHEMA = "DRIFTPROOF_SEMANTIC_V1"
 MAX_DOCUMENT_BYTES = 16_384
 MAX_URL_BYTES = 1_024
@@ -254,7 +254,7 @@ def _retrieve_document(guard: dict[str, typing.Any], generation: int) -> dict[st
     observed_at = _now()
     evidence = _empty_evidence(source_url, observed_at, generation)
     try:
-        response = gl.nondet.web.get(source_url, sign=True)
+        response = gl.nondet.web.get(source_url)
         status = int(getattr(response, "status", 0))
         if status < 200 or status >= 300:
             return {"technical_status": SOURCE_UNAVAILABLE, "evidence": evidence}

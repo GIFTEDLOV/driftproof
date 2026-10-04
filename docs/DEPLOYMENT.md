@@ -25,3 +25,13 @@ Before any separately authorized deployment:
 6. Treat `0xc6b1fed8ae8e20b89a7a1a805bb8cf009d0f865fb073cce14b4fa5e2b2c0aff0` as the only deployment transaction from this run. Do not retry or deploy again. Resolve the signer configuration before any future authorized write.
 
 Current state: contract deployment and readback succeeded, but the observed transaction sender differs from the authorized deployer. No qualification writes were performed.
+
+## Runtime-fix candidate
+
+The repository now contains an undeployed `0.1.1-rc1` candidate with source
+SHA-256 `dd99595a3cb50392b4ec991b7ccb3f2ffa275fc77e14cac5628ed75a4a3aca99`.
+It removes the unnecessary `sign=True` option from public evidence retrieval;
+authority, HTTPS, redirect, byte-limit, UTF-8, digest, semantic, and lifecycle
+controls are unchanged. Deployment #3 remains the canonical historical
+deployment and cannot be patched in place. A future Deployment #4 requires
+explicit authorization and has not occurred.

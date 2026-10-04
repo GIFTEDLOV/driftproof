@@ -1,15 +1,16 @@
 {
   "project": "DriftProof",
-  "release_candidate": "0.1.0-rc1",
+  "release_candidate": "0.1.1-rc1",
   "contract": "contracts/driftproof.py",
   "semantic_schema": "DRIFTPROOF_SEMANTIC_V1",
   "max_document_bytes": 16384,
   "target_network": "Studio-dev",
   "target_chain_id": 61997,
-  "deployment_status": "deployed_readback_verified_signer_mismatch",
+  "deployment_status": "deployed_readback_verified_signer_mismatch_candidate_pending",
   "github_status": "not_created_or_pushed",
-  "contract_sha256": "82d2f653dde89c8b44176e696f970563f34502f14622151f669251c912cf6e0b",
-  "git_blob_sha1": "f9786133c4098364ace1965aa0d9cf35e0b67014",
+  "contract_sha256": "dd99595a3cb50392b4ec991b7ccb3f2ffa275fc77e14cac5628ed75a4a3aca99",
+  "deployed_contract_sha256": "82d2f653dde89c8b44176e696f970563f34502f14622151f669251c912cf6e0b",
+  "git_blob_sha1": "8289069b4b41ff7746c706b8bed74136784a891a",
   "source_reproducible": true,
   "failed_deployments": [
     {
@@ -40,6 +41,35 @@
     "source_parity": "verified",
     "live_qualification": "PENDING",
     "signer_authorization": "MISMATCH"
+  },
+  "qualification_history": [
+    {
+      "attempt": 1,
+      "guard_id": "GUA-00000001",
+      "source": "raw.githubusercontent.com",
+      "freeze_tx": "0xf0b8c3029aa9dda9e0e340e3cc1857dfe196820338230f74795da796a32b823a",
+      "result": "FINALIZED / FINISHED_WITH_ERROR",
+      "error": "DRIFTPROOF:SOURCE_UNAVAILABLE",
+      "assessment_writes": 0
+    },
+    {
+      "attempt": 2,
+      "guard_id": "GUA-00000002",
+      "create_tx": "0x0d0dea51122b07924b5f3b71f1287fbbf068aada9d8ad875851ce64d2c2848ff",
+      "source": "docs.genlayer.com",
+      "freeze_estimate_result": "DRIFTPROOF:SOURCE_UNAVAILABLE",
+      "freeze_tx": null,
+      "assessment_writes": 0
+    }
+  ],
+  "runtime_fix_candidate": {
+    "version": "0.1.1-rc1",
+    "root_cause_class": "SIGNED_WEB_REQUEST_PATH_INCOMPATIBLE_OR_UNRELIABLE_ON_CURRENT_STUDIO_DEV",
+    "change": "omit sign=True from public gl.nondet.web.get",
+    "semantic_schema_changed": false,
+    "abi_changed": false,
+    "deployment_authorized": false,
+    "deployment_number": 4
   },
   "gates": {
     "contract_tests": "pass",

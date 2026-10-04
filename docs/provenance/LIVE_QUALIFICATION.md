@@ -56,3 +56,17 @@ occurred.
 Qualification is incomplete and remains not proven. A future qualification
 attempt requires separate authorization and an authority source reachable by
 the Studio-dev validator set; the existing DRAFT guard cannot be refrozen.
+
+### Qualification recovery attempt #2
+
+- Guard: `GUA-00000002`
+- Source: `https://docs.genlayer.com/understand-genlayer-protocol/core-concepts/transactions/transaction-statuses.md`
+- Create transaction: `0x0d0dea51122b07924b5f3b71f1287fbbf068aada9d8ad875851ce64d2c2848ff`
+- Create result: `FINALIZED / FINISHED_WITH_RETURN`
+- Freeze fee simulation: `DRIFTPROOF:SOURCE_UNAVAILABLE`
+- Freeze transaction: none broadcast
+- Assessment: not run
+
+The attempt was stopped without retry. This second independent
+`SOURCE_UNAVAILABLE` observation is preserved as evidence for the signed-web
+runtime investigation; it does not invalidate Deployment #3.

@@ -60,3 +60,18 @@ The authorized account remained at nonce `126/126` after deployment. The CLI key
 `LIVE_QUALIFICATION=PENDING`  
 `QUALIFICATION_WRITES=0`  
 `GITHUB_PUSHED=NO`
+
+## Undeployed runtime-fix candidate
+
+- Candidate version: `0.1.1-rc1`
+- Candidate source SHA-256: `dd99595a3cb50392b4ec991b7ccb3f2ffa275fc77e14cac5628ed75a4a3aca99`
+- Change: remove `sign=True` from the public `gl.nondet.web.get` call so the SDK default unsigned GET path is used.
+- Semantic schema: unchanged, `DRIFTPROOF_SEMANTIC_V1`
+- ABI: unchanged, 11 public methods / 8 views / 3 writes
+- Deployment #3: preserved as the deployed `0.1.0-rc1` artifact; cannot be patched in place.
+- Deployment #4: not authorized and not performed.
+- Live qualification: pending; no success is claimed.
+
+The candidate preserves the two historical qualification failures, including
+`SOURCE_UNAVAILABLE` for `GUA-00000001` and the read-only freeze estimate
+failure for `GUA-00000002`.

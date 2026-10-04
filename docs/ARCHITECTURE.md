@@ -6,7 +6,7 @@ The contract owns guard identity, normalized authority metadata, the frozen base
 
 ## Nondeterministic boundary
 
-`_retrieve_document` calls the installed GenLayer `gl.nondet.web.get` API. `_semantic_once` calls `gl.nondet.exec_prompt(..., response_format="json")`. `assess_current` invokes both through `gl.vm.run_nondet`; the validator independently performs retrieval and evaluation and compares only the eight semantic vector fields.
+`_retrieve_document` calls the installed GenLayer `gl.nondet.web.get` API using its default unsigned public-GET behavior. `_semantic_once` calls `gl.nondet.exec_prompt(..., response_format="json")`. `assess_current` invokes both through `gl.vm.run_nondet`; the validator independently performs retrieval and evaluation and compares only the eight semantic vector fields. Request signing is not required for DriftProof's public HTTPS evidence model and is intentionally not requested by the release candidate.
 
 The consensus result is bounded to a typed technical state, the vector, and current evidence. Generated prose is never stored or compared.
 
@@ -19,4 +19,3 @@ Baseline and current evidence use exact UTF-8 byte lengths and SHA-256 digests. 
 ## Storage model
 
 JSON records are canonicalized before being written to `TreeMap` fields. `DynArray` indexes preserve guard and assessment order. Assessment history is append-only; an assessment ID is never reused. The duplicate key includes guard, baseline digest, current digest, technical status, and semantic schema version.
-

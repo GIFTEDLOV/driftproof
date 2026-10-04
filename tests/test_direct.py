@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from pathlib import Path
 
 import pytest
 
@@ -49,6 +50,26 @@ def test_contract_info_and_initial_state():
     assert info["guard_count"] == 1
     assert info["max_document_bytes"] == dp.MAX_DOCUMENT_BYTES
     assert info["public_method_count"] == 11
+    assert info["version"] == "0.1.1-rc1"
+
+
+def test_public_source_retrieval_uses_unsigned_default_get():
+    contract, guard_id = make_contract()
+    calls = []
+
+    def capture(url, **kwargs):
+        calls.append(kwargs)
+        return FakeResponse(200, BASELINE, url)
+
+    fake_test_hooks.web_get = capture
+    freeze(contract, guard_id)
+    assert len(calls) == 2
+    assert all("sign" not in kwargs for kwargs in calls)
+
+
+def test_canonical_source_contains_no_signed_public_get():
+    source = Path(__file__).parents[1].joinpath("contracts", "driftproof.py").read_text(encoding="utf-8")
+    assert "gl.nondet.web.get(source_url, sign=True)" not in source
 
 
 def test_guard_normalizes_authority_and_url():

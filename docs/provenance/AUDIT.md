@@ -16,5 +16,15 @@ Audit scope was performed against the first implementation before release-candid
 | DP-010 | Medium | Non-2xx or out-of-authority effective URLs could be stored as evidence. | Retrieval classifies failures and rechecks final URL authority; redirect/status tests pass. |
 | DP-011 | High | The first Studio-dev deployment path supplied only `feeValue`; the v0.6 SDK filled the omitted distribution with zero defaults and the consensus call reverted before contract creation. | Raw transaction/receipt, command path, zero-filled reconstruction, and complete estimator output are recorded in `FAILED_DEPLOYMENT_FEE_FORENSICS.json`; no contract source change was made. |
 | DP-012 | Critical | Deployment #3 executed successfully, but the observed sender was `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266` rather than the authorized deployer `0x61f10cc252ed98ce7596c73fc557cca4cc600c82`. | Deployment hash, sender, unchanged authorized-account nonce, source parity, schema, and readback are recorded in `STUDIO_DEV_DEPLOYMENT.md`; no additional transaction was sent. |
+| DP-013 | High | The candidate hard-coded `sign=True` for public evidence retrieval, adding a GenVM external signer preflight that failed closed as `SOURCE_UNAVAILABLE` for two independent public authorities. | The candidate removes the optional signing request, preserves all source/authority/digest controls, adds unsigned-path regression coverage, and remains undeployed pending separate authorization. |
+
+## Runtime-fix candidate
+
+The undeployed `0.1.1-rc1` candidate changes exactly one executable retrieval
+call from `gl.nondet.web.get(source_url, sign=True)` to
+`gl.nondet.web.get(source_url)`. The deployed `0.1.0-rc1` source and all
+qualification failures remain historical records. The exact internal
+`SIGN_URL_*` failure was not exposed by Studio-dev, so the diagnosis is
+conservatively recorded as `SIGNED_WEB_REQUEST_PATH_INCOMPATIBLE_OR_UNRELIABLE_ON_CURRENT_STUDIO_DEV`.
 
 Residual risks are listed in the final response and are not silently treated as solved by offline tests.

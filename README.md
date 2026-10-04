@@ -6,6 +6,8 @@ DriftProof is a standalone GenLayer Intelligent Contract submission for semantic
 
 This repository contains a Studio-dev deployment with successful execution and readback verification at `0xf7D72f3736A570559900F6eDec9424ac4Ad81992` (chain ID 61997). Live semantic qualification is still pending, and this is not a production claim. The deployment transaction was signed by the CLI-configured account `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266`, which differs from the authorized DriftProof deployer recorded in the release procedure; that signer discrepancy is preserved as a critical operational finding. Earlier failed submissions remain permanently recorded in `docs/provenance/`.
 
+This worktree also contains an undeployed `0.1.1-rc1` runtime-fix candidate. It uses the official default unsigned public GET path after two Studio-dev `SOURCE_UNAVAILABLE` observations on the signed path. Deployment #3 remains historical; Deployment #4 has not been authorized or performed.
+
 ## Problem and trust model
 
 A byte hash detects any change but cannot tell whether meaning changed. DriftProof uses GenLayer validators to independently evaluate a small, closed semantic fact vector. The contract, not a model, derives the business verdict. A caller cannot replace a frozen baseline, change authority or path after creation, provide an arbitrary verdict, overwrite history, or retry the same current content for a different result.
