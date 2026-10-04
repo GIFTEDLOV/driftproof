@@ -6,7 +6,7 @@
   "max_document_bytes": 16384,
   "target_network": "Studio-dev",
   "target_chain_id": 61997,
-  "deployment_status": "deployment_4_readback_verified_live_qualification_pending",
+  "deployment_status": "deployment_4_live_qualification_verified",
   "github_status": "not_created_or_pushed",
   "contract_sha256": "dd99595a3cb50392b4ec991b7ccb3f2ffa275fc77e14cac5628ed75a4a3aca99",
   "deployed_contract_sha256": "dd99595a3cb50392b4ec991b7ccb3f2ffa275fc77e14cac5628ed75a4a3aca99",
@@ -64,7 +64,7 @@
       "guard_count": 0
     },
     "source_parity": "submitted_source_sha256_verified",
-    "live_qualification": "PENDING"
+    "live_qualification": "VERIFIED"
   },
   "qualification_history": [
     {
@@ -84,8 +84,62 @@
       "freeze_estimate_result": "DRIFTPROOF:SOURCE_UNAVAILABLE",
       "freeze_tx": null,
       "assessment_writes": 0
+    },
+    {
+      "attempt": 3,
+      "contract_address": "0x52f6B57373DE9677b5Fc883B59CA4cc3a257B4a1",
+      "guard_id": "GUA-00000001",
+      "create_tx": "0x92e7c38d5ade14bb6b8d7565247c723c45257d5b8315d86e4e93b5c9afb27b67",
+      "create_nonce": 143,
+      "create_result": "FINALIZED / FINISHED_WITH_RETURN",
+      "baseline_id": "BAS-GUA-00000001",
+      "freeze_tx": "0xbade233202339d602501dd04bf3ec414534e364b9f0392ef350c58ef1b2e16e2",
+      "freeze_nonce": 144,
+      "freeze_result": "FINALIZED / FINISHED_WITH_RETURN",
+      "assessment_id": "ASM-00000001",
+      "assess_tx": "0xb62064ea123cafbf6e7fb8719fc1b61d6cd36357b848cee08f8cd99032cc536b",
+      "assess_nonce": 145,
+      "assess_result": "FINALIZED / FINISHED_WITH_RETURN",
+      "source_url": "https://docs.genlayer.com/understand-genlayer-protocol/core-concepts/transactions/transaction-statuses.md",
+      "source_sha256": "6affda7436ae97bde0668137f6dcde69c2fa4fc1502c1c22d6d0a6d95da4aaaf",
+      "source_utf8_bytes": 3223,
+      "generation": 1,
+      "verdict": "NO_MATERIAL_CHANGE",
+      "evidence_sufficient": true,
+      "assessment_history_entries": 1
     }
   ],
+  "qualification": {
+    "contract_address": "0x52f6B57373DE9677b5Fc883B59CA4cc3a257B4a1",
+    "guard_id": "GUA-00000001",
+    "baseline_id": "BAS-GUA-00000001",
+    "assessment_id": "ASM-00000001",
+    "source_url": "https://docs.genlayer.com/understand-genlayer-protocol/core-concepts/transactions/transaction-statuses.md",
+    "authority_id": "genlayerlabs/genlayer-docs/transaction-statuses",
+    "authority_host": "docs.genlayer.com",
+    "authority_path_prefix": "/understand-genlayer-protocol/core-concepts/transactions/transaction-statuses.md",
+    "protected_dimensions": ["obligation_changed", "permission_changed", "prohibition_changed", "scope_changed", "deadline_changed", "exception_changed"],
+    "source_sha256_baseline": "6affda7436ae97bde0668137f6dcde69c2fa4fc1502c1c22d6d0a6d95da4aaaf",
+    "source_sha256_assessment": "6affda7436ae97bde0668137f6dcde69c2fa4fc1502c1c22d6d0a6d95da4aaaf",
+    "source_utf8_bytes_baseline": 3223,
+    "source_utf8_bytes_assessment": 3223,
+    "generation": 1,
+    "verdict": "NO_MATERIAL_CHANGE",
+    "evidence_sufficient": true,
+    "semantic_vector": {
+      "obligation_changed": false,
+      "permission_changed": false,
+      "prohibition_changed": false,
+      "scope_changed": false,
+      "deadline_changed": false,
+      "economic_term_changed": false,
+      "exception_changed": false,
+      "evidence_sufficient": true
+    },
+    "final_balance_wei": "209638566798427093",
+    "final_nonce_latest": 146,
+    "final_nonce_pending": 146
+  },
   "runtime_fix_candidate": {
     "version": "0.1.1-rc1",
     "root_cause_class": "SIGNED_WEB_REQUEST_PATH_INCOMPATIBLE_OR_UNRELIABLE_ON_CURRENT_STUDIO_DEV",

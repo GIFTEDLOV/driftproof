@@ -17,6 +17,7 @@ Audit scope was performed against the first implementation before release-candid
 | DP-011 | High | The first Studio-dev deployment path supplied only `feeValue`; the v0.6 SDK filled the omitted distribution with zero defaults and the consensus call reverted before contract creation. | Raw transaction/receipt, command path, zero-filled reconstruction, and complete estimator output are recorded in `FAILED_DEPLOYMENT_FEE_FORENSICS.json`; no contract source change was made. |
 | DP-012 | Critical | Deployment #3 executed successfully, but the observed sender was `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266` rather than the authorized deployer `0x61f10cc252ed98ce7596c73fc557cca4cc600c82`. | Deployment hash, sender, unchanged authorized-account nonce, source parity, schema, and readback are recorded in `STUDIO_DEV_DEPLOYMENT.md`; no additional transaction was sent. |
 | DP-013 | High | The candidate hard-coded `sign=True` for public evidence retrieval, adding a GenVM external signer preflight that failed closed as `SOURCE_UNAVAILABLE` for two independent public authorities. | Deployment #4 removes the optional signing request, preserves all source/authority/digest controls, and passed the unsigned-path regression coverage. |
+| DP-014 | Informational | Deployment #4 required live proof that public unsigned retrieval works through the full validator path. | One guard, one finalized baseline, and one finalized first assessment completed without retry. The source was stable at 3,223 bytes / SHA-256 `6affda7436ae97bde0668137f6dcde69c2fa4fc1502c1c22d6d0a6d95da4aaaf`; verdict was `NO_MATERIAL_CHANGE` with sufficient evidence. |
 
 ## Runtime-fix candidate
 
@@ -28,3 +29,11 @@ diagnosis remains conservatively recorded as
 `SIGNED_WEB_REQUEST_PATH_INCOMPATIBLE_OR_UNRELIABLE_ON_CURRENT_STUDIO_DEV`.
 
 Residual risks are listed in the final response and are not silently treated as solved by offline tests.
+
+## Live qualification evidence
+
+Deployment #4 is now live-qualified. The canonical final state is one active
+guard (`GUA-00000001`), frozen baseline (`BAS-GUA-00000001`), and one
+append-only assessment (`ASM-00000001`, generation `1`). The first result is
+`NO_MATERIAL_CHANGE` with `evidence_sufficient=true`; no reassessment or result
+shopping occurred.

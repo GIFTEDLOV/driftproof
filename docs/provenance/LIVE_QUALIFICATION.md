@@ -70,3 +70,57 @@ the Studio-dev validator set; the existing DRAFT guard cannot be refrozen.
 The attempt was stopped without retry. This second independent
 `SOURCE_UNAVAILABLE` observation is preserved as evidence for the signed-web
 runtime investigation; it does not invalidate Deployment #3.
+
+## Deployment #4 live qualification
+
+The unsigned public-web runtime fix was qualified on the canonical Deployment
+#4 contract `0x52f6B57373DE9677b5Fc883B59CA4cc3a257B4a1` using signer
+`0x61f10cc252ed98ce7596c73fc557cca4cc600c82`. Exactly three qualification
+writes were broadcast, sequentially, with no retry or reassessment:
+
+### create_guard
+
+- Transaction: `0x92e7c38d5ade14bb6b8d7565247c723c45257d5b8315d86e4e93b5c9afb27b67`
+- Nonce: `143`
+- Final status/execution: `FINALIZED / FINISHED_WITH_RETURN`
+- Fee value: `378525600010352` wei; settled cost `78635500000823` wei; refund `299890100009529` wei.
+- Canonical guard: `GUA-00000001`
+- Creator: `0x61f10cc252ed98ce7596c73fc557cca4cc600c82`
+- State after creation: `DRAFT`
+
+The guard binds authority `genlayerlabs/genlayer-docs/transaction-statuses`,
+host `docs.genlayer.com`, the exact Markdown path and URL, all six protected
+dimensions, and a 16,384-byte maximum.
+
+### freeze_baseline
+
+- Transaction: `0xbade233202339d602501dd04bf3ec414534e364b9f0392ef350c58ef1b2e16e2`
+- Nonce: `144`
+- Final status/execution: `FINALIZED / FINISHED_WITH_RETURN`
+- Fee value: `449029200010352` wei; settled cost `93323750000823` wei; refund `355705450009529` wei.
+- Baseline: `BAS-GUA-00000001`
+- URL: `https://docs.genlayer.com/understand-genlayer-protocol/core-concepts/transactions/transaction-statuses.md`
+- Source: HTTP 200, 3,223 UTF-8 bytes, SHA-256 `6affda7436ae97bde0668137f6dcde69c2fa4fc1502c1c22d6d0a6d95da4aaaf`
+- Canonical state: `BASELINE_FROZEN`
+
+### assess_current
+
+- Transaction: `0xb62064ea123cafbf6e7fb8719fc1b61d6cd36357b848cee08f8cd99032cc536b`
+- Nonce: `145`
+- Final status/execution: `FINALIZED / FINISHED_WITH_RETURN`
+- Fee value: `452240400010352` wei; settled cost `93992750000823` wei; refund `358247650009529` wei.
+- Assessment: `ASM-00000001`
+- Generation: `1`
+- Baseline SHA: `6affda7436ae97bde0668137f6dcde69c2fa4fc1502c1c22d6d0a6d95da4aaaf`
+- Current SHA: `6affda7436ae97bde0668137f6dcde69c2fa4fc1502c1c22d6d0a6d95da4aaaf`
+- Verdict: `NO_MATERIAL_CHANGE`
+- Evidence sufficient: `true`
+- Semantic vector: all protected dimensions `false`; `evidence_sufficient=true`
+- Technical status: `OK`
+
+Final canonical state is one guard (`GUA-00000001`), `ACTIVE`, generation `1`,
+with one append-only assessment history entry. Final signer state was balance
+`209638566798427093` wei and nonce `146/146`. No deployment, faucet, transfer,
+or other-project write occurred in this qualification pass.
+
+`LIVE_QUALIFICATION=VERIFIED`.

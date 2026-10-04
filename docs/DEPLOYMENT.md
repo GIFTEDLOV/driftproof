@@ -24,7 +24,9 @@ Before any separately authorized deployment:
 5. Pass the complete `fees.distribution` and `feeValue` object produced by the official estimator; do not use `--fee-value` alone.
 6. Treat `0xc6b1fed8ae8e20b89a7a1a805bb8cf009d0f865fb073cce14b4fa5e2b2c0aff0` as the only deployment transaction from this run. Do not retry or deploy again. Resolve the signer configuration before any future authorized write.
 
-Current state: contract deployment and readback succeeded, but the observed transaction sender differs from the authorized deployer. No qualification writes were performed.
+Historical Deployment #3 state: contract deployment and readback succeeded, but
+the observed transaction sender differs from the authorized deployer. No
+qualification writes were performed against Deployment #3.
 
 ## Deployment #4 runtime-fix deployment
 
@@ -41,5 +43,20 @@ controls are unchanged.
 - Execution: `FINISHED_WITH_RETURN`
 - Status: `Finalized`
 
-Deployment #3 remains preserved as the prior historical deployment. Live
-qualification is still pending.
+Deployment #3 remains preserved as the prior historical deployment. Deployment
+#4 live qualification is now complete:
+
+- `create_guard`: `0x92e7c38d5ade14bb6b8d7565247c723c45257d5b8315d86e4e93b5c9afb27b67`, nonce `143`, `FINALIZED / FINISHED_WITH_RETURN`.
+- `freeze_baseline`: `0xbade233202339d602501dd04bf3ec414534e364b9f0392ef350c58ef1b2e16e2`, nonce `144`, `FINALIZED / FINISHED_WITH_RETURN`.
+- `assess_current`: `0xb62064ea123cafbf6e7fb8719fc1b61d6cd36357b848cee08f8cd99032cc536b`, nonce `145`, `FINALIZED / FINISHED_WITH_RETURN`.
+
+The canonical guard is `GUA-00000001`, baseline `BAS-GUA-00000001`, and first
+assessment `ASM-00000001`. The configured source was HTTP 200 and stable at
+3,223 UTF-8 bytes with SHA-256
+`6affda7436ae97bde0668137f6dcde69c2fa4fc1502c1c22d6d0a6d95da4aaaf` at both
+baseline and assessment. Generation `1` returned `NO_MATERIAL_CHANGE` with
+`evidence_sufficient=true` and all protected semantic dimensions false.
+
+Settled costs were `78635500000823`, `93323750000823`, and `93992750000823`
+wei respectively. Final account state was balance `209638566798427093` wei
+and nonce `146/146`. `LIVE_QUALIFICATION=VERIFIED`.

@@ -70,7 +70,8 @@ The authorized account remained at nonce `126/126` after deployment. The CLI key
 - ABI: unchanged, 11 public methods / 8 views / 3 writes
 - Deployment #3: preserved as the deployed `0.1.0-rc1` artifact; cannot be patched in place.
 - Deployment #4: completed under separate authorization.
-- Live qualification: pending; no qualification success is claimed.
+- Deployment-time qualification status: pending; the later Deployment #4
+  qualification is recorded below and does not alter this historical record.
 
 The candidate preserves the two historical qualification failures, including
 `SOURCE_UNAVAILABLE` for `GUA-00000001` and the read-only freeze estimate
@@ -94,3 +95,28 @@ failure for `GUA-00000002`.
 - Initial guard count: `0`
 - Initial guard IDs: `[]`
 - Source parity: submitted transaction source bytes SHA-256 verified
+
+## Deployment #4 live qualification
+
+Deployment #4 was followed by the authorized three-write qualification on the
+same Studio-dev contract. The signer was explicitly verified as
+`agentpact-requester` / `0x61f10cc252ed98ce7596c73fc557cca4cc600c82`.
+
+| Operation | Transaction | Nonce | Final status | Execution | Fee value (wei) | Settled cost (wei) | Refund (wei) |
+|---|---|---:|---|---|---:|---:|---:|
+| `create_guard` | `0x92e7c38d5ade14bb6b8d7565247c723c45257d5b8315d86e4e93b5c9afb27b67` | 143 | Finalized | FINISHED_WITH_RETURN | 378525600010352 | 78635500000823 | 299890100009529 |
+| `freeze_baseline` | `0xbade233202339d602501dd04bf3ec414534e364b9f0392ef350c58ef1b2e16e2` | 144 | Finalized | FINISHED_WITH_RETURN | 449029200010352 | 93323750000823 | 355705450009529 |
+| `assess_current` | `0xb62064ea123cafbf6e7fb8719fc1b61d6cd36357b848cee08f8cd99032cc536b` | 145 | Finalized | FINISHED_WITH_RETURN | 452240400010352 | 93992750000823 | 358247650009529 |
+
+The canonical guard is `GUA-00000001` and is now `ACTIVE`. The baseline is
+`BAS-GUA-00000001`; the first assessment is `ASM-00000001` at generation `1`.
+The configured source returned HTTP 200 and two repeated reads matched at
+3,223 UTF-8 bytes with SHA-256
+`6affda7436ae97bde0668137f6dcde69c2fa4fc1502c1c22d6d0a6d95da4aaaf`. The
+baseline and assessment current evidence both match that SHA and byte length.
+
+The canonical verdict is `NO_MATERIAL_CHANGE`, with `evidence_sufficient=true`,
+technical status `OK`, and all protected dimensions false. Final account state
+was balance `209638566798427093` wei and nonce `146/146`. No retries,
+reassessments, deployments, faucet, transfer, or unrelated project writes were
+performed in this pass.
