@@ -1,0 +1,93 @@
+{
+  "schema": "DRIFTPROOF_STUDIO_DEV_RELEASE_V1",
+  "release_candidate": "0.1.2-rc1",
+  "network": {
+    "name": "Studio-dev",
+    "chain_id": 61997,
+    "rpc": "https://studio-dev.genlayer.com/api"
+  },
+  "contract": {
+    "path": "contracts/driftproof.py",
+    "sha256": "2f0e270f76b22b788b18dc2572ef400f329cbdbd32c8fd4fb06f9430c2acf0b6",
+    "runner": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng",
+    "address": "0xCB3D6e0762860C1577D8B230FAe583bCdd7f0ae5",
+    "source_parity": "exact_remote_bytes_verified",
+    "abi": {
+      "public_methods": 11,
+      "views": 8,
+      "writes": 3
+    }
+  },
+  "signer": "0x61F10Cc252eD98Ce7596c73fc557cca4cc600c82",
+  "deployment": {
+    "tx_hash": "0x28789bc3946a6c6f857059fae0609dfba6453c952426973483bf78ad60e8bcb3",
+    "result": "FINALIZED / FINISHED_WITH_RETURN / MAJORITY_AGREE",
+    "fee_deposit_wei": "100000000000010352",
+    "distribution": {
+      "leaderTimeunitsAllocation": "100",
+      "validatorTimeunitsAllocation": "200",
+      "appealRounds": "0",
+      "executionBudgetPerRound": "25000000000000000",
+      "executionConsumed": "0",
+      "totalMessageFees": "0",
+      "rotations": ["3"],
+      "maxPriceGenPerTimeUnit": "2",
+      "storageFeeMaxGasPrice": "300000000",
+      "receiptFeeMaxGasPrice": "300000000"
+    }
+  },
+  "qualification": {
+    "guard_id": "GUA-00000001",
+    "baseline_id": "BAS-GUA-00000001",
+    "assessment_id": "ASM-00000001",
+    "writes": [
+      {
+        "method": "create_guard",
+        "tx_hash": "0xf9ee9bfd1887874807f7167ce3cc912c7563e79fab9d4f316fcf024fb00707cb",
+        "result": "FINALIZED / FINISHED_WITH_RETURN",
+        "fee_deposit_wei": "378525600010352",
+        "settled_fee_wei": "78635500000823"
+      },
+      {
+        "method": "freeze_baseline",
+        "tx_hash": "0x50b595188be73b74c3f312db07e5dbcb2776713ee57d7a1a6d31c3908fb0ca00",
+        "result": "FINALIZED / FINISHED_WITH_RETURN",
+        "fee_deposit_wei": "449029200010352",
+        "settled_fee_wei": "93323750000823"
+      },
+      {
+        "method": "assess_current",
+        "tx_hash": "0x56958d8f7856bfc235c4170a3a24fd7ea7ecf20d3da7357409f9bf18716ed568",
+        "result": "FINALIZED / FINISHED_WITH_RETURN",
+        "fee_deposit_wei": "455246400010352",
+        "settled_fee_wei": "94619000000823"
+      }
+    ],
+    "source_url": "https://docs.genlayer.com/understand-genlayer-protocol/core-concepts/transactions/transaction-statuses.md",
+    "effective_url": "https://docs.genlayer.com/understand-genlayer-protocol/core-concepts/transactions/transaction-statuses.md",
+    "evidence_sha256": "6affda7436ae97bde0668137f6dcde69c2fa4fc1502c1c22d6d0a6d95da4aaaf",
+    "exact_byte_length": 3223,
+    "technical_status": "OK",
+    "semantic_vector": {
+      "obligation_changed": false,
+      "permission_changed": false,
+      "prohibition_changed": false,
+      "scope_changed": false,
+      "deadline_changed": false,
+      "economic_term_changed": false,
+      "exception_changed": false,
+      "evidence_sufficient": true
+    },
+    "generation": 1,
+    "verdict": "NO_MATERIAL_CHANGE",
+    "history_entries": 1
+  },
+  "final_account_readback": {
+    "balance_wei": "209293099048423801",
+    "nonce_latest": 150,
+    "nonce_pending": 150
+  },
+  "github_pushed": false,
+  "portal_submitted": false,
+  "additional_transactions": 0
+}

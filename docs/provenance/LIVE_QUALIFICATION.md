@@ -124,3 +124,26 @@ with one append-only assessment history entry. Final signer state was balance
 or other-project write occurred in this qualification pass.
 
 `LIVE_QUALIFICATION=VERIFIED`.
+
+## Corrected `0.1.2-rc1` release qualification
+
+The corrected source was qualified on Deployment #5 at
+`0xCB3D6e0762860C1577D8B230FAe583bCdd7f0ae5` with signer
+`0x61F10Cc252eD98Ce7596c73fc557cca4cc600c82`. The deployment transaction was
+`0x28789bc3946a6c6f857059fae0609dfba6453c952426973483bf78ad60e8bcb3`; exact
+source parity matched SHA-256
+`2f0e270f76b22b788b18dc2572ef400f329cbdbd32c8fd4fb06f9430c2acf0b6`.
+
+Exactly three writes were sent and finalized successfully:
+
+- `create_guard`: `0xf9ee9bfd1887874807f7167ce3cc912c7563e79fab9d4f316fcf024fb00707cb`
+- `freeze_baseline`: `0x50b595188be73b74c3f312db07e5dbcb2776713ee57d7a1a6d31c3908fb0ca00`
+- `assess_current`: `0x56958d8f7856bfc235c4170a3a24fd7ea7ecf20d3da7357409f9bf18716ed568`
+
+The final state is `GUA-00000001` / `BAS-GUA-00000001` / `ASM-00000001`,
+`ACTIVE`, generation `1`, technical status `OK`, and one append-only history
+entry. Baseline and current evidence are both 3223 UTF-8 bytes with SHA-256
+`6affda7436ae97bde0668137f6dcde69c2fa4fc1502c1c22d6d0a6d95da4aaaf` at the
+same verified source/effective URL. The eight-field semantic vector has all
+change dimensions false and `evidence_sufficient=true`; verdict:
+`NO_MATERIAL_CHANGE`.

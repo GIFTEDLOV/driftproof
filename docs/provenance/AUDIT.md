@@ -31,16 +31,20 @@ diagnosis remains conservatively recorded as
 
 ## Corrected release candidate
 
-The local `0.1.2-rc1` candidate remediates DP-015. It has not been deployed or
-sent to GitHub. The prior Deployment #4 source hash and qualification are
-historical only and do not verify this corrected source.
+The `0.1.2-rc1` candidate remediates DP-015. It was deployed once as
+Deployment #5 and source/state-qualified on Studio-dev; it has not been pushed
+to GitHub or submitted to the Portal. Deployment #4 remains historical and
+does not verify the corrected source.
 
 The regression suite reproduces the old acceptance condition with a legacy
 vector-only predicate, then exercises the actual `assess_current` invocation
 path to reject differing status, SHA-256, content, byte length, effective URL,
 source URL, generation, malformed fields, and conflicting technical states.
 
-Residual risks are listed in the final response and are not silently treated as solved by offline tests.
+The live qualification confirms corrected source parity and complete
+assessment identity for one public source. It does not replace ongoing
+monitoring for future source changes, validator availability, or new runtime
+versions.
 
 ## Live qualification evidence
 
@@ -49,3 +53,15 @@ guard (`GUA-00000001`), frozen baseline (`BAS-GUA-00000001`), and one
 append-only assessment (`ASM-00000001`, generation `1`). The first result is
 `NO_MATERIAL_CHANGE` with `evidence_sufficient=true`; no reassessment or result
 shopping occurred.
+
+## Corrected release live evidence
+
+Deployment #5 (`0xCB3D6e0762860C1577D8B230FAe583bCdd7f0ae5`) completed with the
+expected source SHA-256
+`2f0e270f76b22b788b18dc2572ef400f329cbdbd32c8fd4fb06f9430c2acf0b6`, exact
+remote-byte parity, and the unchanged 11-method ABI. Its deployment and the
+three authorized qualification transactions all finalized with
+`FINISHED_WITH_RETURN`. Readback verified the corrected contract's
+`GUA-00000001` guard, immutable baseline, `ASM-00000001` history entry,
+technical status `OK`, source/effective URL, 3223-byte content, matching
+SHA-256, generation `1`, and deterministic `NO_MATERIAL_CHANGE` verdict.

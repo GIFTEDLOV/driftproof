@@ -77,12 +77,10 @@ Settled costs were `78635500000823`, `93323750000823`, and `93992750000823`
 wei respectively. Final account state was balance `209638566798427093` wei
 and nonce `146/146`. `LIVE_QUALIFICATION=VERIFIED`.
 
-## Corrected `0.1.2-rc1` redeployment candidate
+## Corrected `0.1.2-rc1` release candidate (historical predeployment notes)
 
-This remediation is local-only. The corrected source has not been deployed, no
-Studio-dev transaction was sent, and Deployment #4 cannot be patched in place.
-The corrected candidate requires a new deployment and a fresh source/ABI parity
-check.
+These were the predeployment notes. Deployment #4 could not be patched in
+place; the corrected candidate was later deployed as Deployment #5 below.
 
 The installed GenLayer CLI exposes the following read-only fee-estimation
 command:
@@ -127,13 +125,40 @@ genlayer deploy `
 ```
 
 Replace the fee values with the fresh estimator result if they differ. This
-command is prepared, not executed in this remediation.
+CLI command was not used for Deployment #5 because the installed CLI's
+`parseArg` implementation mis-encoded the required string argument for
+`protected_dimensions`. Deployment #5 used the exact pinned `genlayer-js`
+client API with shell-free argument construction and the same authorized
+keystore signer.
 
-## Minimal live qualification after separate authorization
+## Deployment #5 live qualification
 
-1. Deploy the corrected source and record the actual deployment transaction and address.
-2. Read back source and ABI; verify parity with the committed source hash and the 11-method ABI.
-3. Call `create_guard` with the selected authority, exact HTTPS source URL, path prefix, protected dimensions, and byte limit; record its transaction hash.
-4. Call `freeze_baseline`; verify finality, `BASELINE_FROZEN`, source/effective URL, SHA-256, byte length, and content readback.
-5. Call `assess_current`; verify finality, technical status, evidence identity, verdict, generation, and readback history.
-6. Record the actual transaction hashes, deployment address, source hash, ABI parity, and final readback in a new provenance entry. Do not copy historical Deployment #4 hashes into the corrected release record.
+Deployment #5 completed under the authorized Studio-dev workflow.
+
+- Contract: `0xCB3D6e0762860C1577D8B230FAe583bCdd7f0ae5`
+- Deployment transaction: `0x28789bc3946a6c6f857059fae0609dfba6453c952426973483bf78ad60e8bcb3`
+- Signer: `0x61f10cc252ed98ce7596c73fc557cca4cc600c82`
+- Source SHA-256: `2f0e270f76b22b788b18dc2572ef400f329cbdbd32c8fd4fb06f9430c2acf0b6`
+- Source parity: exact remote bytes verified; ABI parity verified at 11 methods, 8 views, 3 writes.
+- Deployment result: `FINALIZED / FINISHED_WITH_RETURN / MAJORITY_AGREE`.
+- Deployment fee deposit: `100000000000010352` wei.
+
+Qualification was exactly three sequential writes, each signed by the
+authorized account and finalized successfully:
+
+| Operation | Transaction | Result | Fee deposit (wei) |
+|---|---|---|---:|
+| `create_guard` | `0xf9ee9bfd1887874807f7167ce3cc912c7563e79fab9d4f316fcf024fb00707cb` | `FINALIZED / FINISHED_WITH_RETURN` | 378525600010352 |
+| `freeze_baseline` | `0x50b595188be73b74c3f312db07e5dbcb2776713ee57d7a1a6d31c3908fb0ca00` | `FINALIZED / FINISHED_WITH_RETURN` | 449029200010352 |
+| `assess_current` | `0x56958d8f7856bfc235c4170a3a24fd7ea7ecf20d3da7357409f9bf18716ed568` | `FINALIZED / FINISHED_WITH_RETURN` | 455246400010352 |
+
+The canonical IDs are `GUA-00000001`, `BAS-GUA-00000001`, and
+`ASM-00000001`. Readback verifies `ACTIVE`, generation `1`, technical status
+`OK`, current and baseline SHA-256
+`6affda7436ae97bde0668137f6dcde69c2fa4fc1502c1c22d6d0a6d95da4aaaf`, exact
+UTF-8 length `3223`, stable source/effective URL, one append-only history
+entry, and verdict `NO_MATERIAL_CHANGE`. All eight semantic fields are bound;
+the six protected dimensions are false and `evidence_sufficient=true`.
+
+No additional deployment, qualification, faucet, transfer, or unrelated
+project write was performed. GitHub and Portal actions remain separate.

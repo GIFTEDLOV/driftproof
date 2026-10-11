@@ -7,10 +7,10 @@
   "max_document_bytes": 16384,
   "target_network": "Studio-dev",
   "target_chain_id": 61997,
-  "deployment_status": "corrected_source_not_deployed",
+  "deployment_status": "corrected_source_deployed_and_live_qualified",
   "github_status": "not_created_or_pushed",
   "contract_sha256": "2f0e270f76b22b788b18dc2572ef400f329cbdbd32c8fd4fb06f9430c2acf0b6",
-  "deployed_contract_sha256": null,
+  "deployed_contract_sha256": "2f0e270f76b22b788b18dc2572ef400f329cbdbd32c8fd4fb06f9430c2acf0b6",
   "historical_deployment_4_contract_sha256": "dd99595a3cb50392b4ec991b7ccb3f2ffa275fc77e14cac5628ed75a4a3aca99",
   "historical_deployment_3_contract_sha256": "82d2f653dde89c8b44176e696f970563f34502f14622151f669251c912cf6e0b",
   "git_blob_sha1": "220e4ca57b8cb088acfe4c5fff8fc02ba05766d7",
@@ -77,6 +77,39 @@
     "source_parity": "submitted_source_sha256_verified",
     "live_qualification": "VERIFIED"
   },
+  "deployment_5": {
+    "number": 5,
+    "release_candidate": "0.1.2-rc1",
+    "tx_hash": "0x28789bc3946a6c6f857059fae0609dfba6453c952426973483bf78ad60e8bcb3",
+    "contract_address": "0xCB3D6e0762860C1577D8B230FAe583bCdd7f0ae5",
+    "network": "studio-dev",
+    "chain_id": 61997,
+    "authorized_deployer": "0x61f10cc252ed98ce7596c73fc557cca4cc600c82",
+    "observed_sender": "0x61F10Cc252eD98Ce7596c73fC557cCA4cc600c82",
+    "source_sha256": "2f0e270f76b22b788b18dc2572ef400f329cbdbd32c8fd4fb06f9430c2acf0b6",
+    "runner": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng",
+    "fee_value": "100000000000010352",
+    "fee_distribution": {
+      "leaderTimeunitsAllocation": "100",
+      "validatorTimeunitsAllocation": "200",
+      "appealRounds": "0",
+      "executionBudgetPerRound": "25000000000000000",
+      "executionConsumed": "0",
+      "totalMessageFees": "0",
+      "rotations": ["3"],
+      "maxPriceGenPerTimeUnit": "2",
+      "storageFeeMaxGasPrice": "300000000",
+      "receiptFeeMaxGasPrice": "300000000"
+    },
+    "execution_result": "FINISHED_WITH_RETURN",
+    "stored_status": "Finalized",
+    "schema": {"public_methods": 11, "views": 8, "writes": 3},
+    "source_parity": "verified_exact_remote_bytes",
+    "total_fee_deposit_wei": "101282801200041408",
+    "total_settled_fee_wei": "345467750003292",
+    "qualification_writes": 3,
+    "live_qualification": "VERIFIED"
+  },
   "qualification_history": [
     {
       "attempt": 1,
@@ -118,10 +151,51 @@
       "verdict": "NO_MATERIAL_CHANGE",
       "evidence_sufficient": true,
       "assessment_history_entries": 1
+    },
+    {
+      "attempt": 4,
+      "contract_address": "0xCB3D6e0762860C1577D8B230FAe583bCdd7f0ae5",
+      "guard_id": "GUA-00000001",
+      "create_tx": "0xf9ee9bfd1887874807f7167ce3cc912c7563e79fab9d4f316fcf024fb00707cb",
+      "create_result": "FINALIZED / FINISHED_WITH_RETURN",
+      "baseline_id": "BAS-GUA-00000001",
+      "freeze_tx": "0x50b595188be73b74c3f312db07e5dbcb2776713ee57d7a1a6d31c3908fb0ca00",
+      "freeze_result": "FINALIZED / FINISHED_WITH_RETURN",
+      "assessment_id": "ASM-00000001",
+      "assess_tx": "0x56958d8f7856bfc235c4170a3a24fd7ea7ecf20d3da7357409f9bf18716ed568",
+      "assess_result": "FINALIZED / FINISHED_WITH_RETURN",
+      "source_url": "https://docs.genlayer.com/understand-genlayer-protocol/core-concepts/transactions/transaction-statuses.md",
+      "source_sha256": "6affda7436ae97bde0668137f6dcde69c2fa4fc1502c1c22d6d0a6d95da4aaaf",
+      "source_utf8_bytes": 3223,
+      "generation": 1,
+      "technical_status": "OK",
+      "verdict": "NO_MATERIAL_CHANGE",
+      "evidence_sufficient": true,
+      "semantic_vector": {
+        "obligation_changed": false,
+        "permission_changed": false,
+        "prohibition_changed": false,
+        "scope_changed": false,
+        "deadline_changed": false,
+        "economic_term_changed": false,
+        "exception_changed": false,
+        "evidence_sufficient": true
+      },
+      "assessment_history_entries": 1,
+      "fee_deposits_wei": {
+        "create_guard": "378525600010352",
+        "freeze_baseline": "449029200010352",
+        "assess_current": "455246400010352"
+      },
+      "settled_fee_wei": {
+        "create_guard": "78635500000823",
+        "freeze_baseline": "93323750000823",
+        "assess_current": "94619000000823"
+      }
     }
   ],
   "qualification": {
-    "contract_address": "0x52f6B57373DE9677b5Fc883B59CA4cc3a257B4a1",
+    "contract_address": "0xCB3D6e0762860C1577D8B230FAe583bCdd7f0ae5",
     "guard_id": "GUA-00000001",
     "baseline_id": "BAS-GUA-00000001",
     "assessment_id": "ASM-00000001",
@@ -147,9 +221,9 @@
       "exception_changed": false,
       "evidence_sufficient": true
     },
-    "final_balance_wei": "209638566798427093",
-    "final_nonce_latest": 146,
-    "final_nonce_pending": 146
+    "final_balance_wei": "209293099048423801",
+    "final_nonce_latest": 150,
+    "final_nonce_pending": 150
   },
   "corrected_release": {
     "version": "0.1.2-rc1",
@@ -158,7 +232,7 @@
     "semantic_schema_changed": false,
     "abi_changed": false,
     "deployment_required": true,
-    "deployed": false,
+    "deployed": true,
     "historical_source_not_equivalent": true,
     "historical_deployment_4_sha256": "dd99595a3cb50392b4ec991b7ccb3f2ffa275fc77e14cac5628ed75a4a3aca99"
   },
@@ -184,8 +258,8 @@
     "semantic_validation": "pass (official genvm-lint validate with GENVM_VERSION=v0.6.0-rc6)",
     "schema_check": "pass (official genvm-lint schema; 11 methods, 8 views, 3 writes)",
     "genvm_typecheck": "pass (official genvm-lint typecheck with GENVM_VERSION=v0.6.0-rc6)",
-    "security_audit": "pass_offline; live deployment not performed",
+    "security_audit": "pass_offline_with_live_source_and_state_qualification",
     "secret_scan": "pass"
   },
-  "release_readiness": "GO_FOR_SEPARATELY_AUTHORIZED_STUDIO_DEV_REDEPLOYMENT"
+  "release_readiness": "GO_FOR_GITHUB_AND_PORTAL_RESUBMISSION"
 }

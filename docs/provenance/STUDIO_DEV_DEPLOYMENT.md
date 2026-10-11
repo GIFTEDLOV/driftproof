@@ -120,3 +120,42 @@ technical status `OK`, and all protected dimensions false. Final account state
 was balance `209638566798427093` wei and nonce `146/146`. No retries,
 reassessments, deployments, faucet, transfer, or unrelated project writes were
 performed in this pass.
+
+## Deployment #5 corrected release
+
+The corrected `0.1.2-rc1` source was deployed once after the prior CLI fee
+argument failure was diagnosed. The exact pinned `genlayer-js` SDK was used
+with shell-free argument construction because the installed CLI's documented
+`str:` syntax is not implemented by its `parseArg` function.
+
+- Contract: `0xCB3D6e0762860C1577D8B230FAe583bCdd7f0ae5`
+- Source SHA-256: `2f0e270f76b22b788b18dc2572ef400f329cbdbd32c8fd4fb06f9430c2acf0b6`
+- Deployment transaction: `0x28789bc3946a6c6f857059fae0609dfba6453c952426973483bf78ad60e8bcb3`
+- Signer: `0x61F10Cc252eD98Ce7596c73fC557cCA4cc600c82`
+- Chain: `61997`; result: `FINALIZED / FINISHED_WITH_RETURN / MAJORITY_AGREE`
+- Source parity: exact remote bytes verified; schema parity: 11 methods, 8 views, 3 writes
+- Contract info: `DriftProof`, `0.1.2-rc1`, `DRIFTPROOF_SEMANTIC_V1`, 16384 max document bytes
+
+### Corrected release qualification
+
+Exactly three qualification writes were authorized and sent, in order:
+
+| Operation | Transaction | Final result | Fee deposit (wei) | Settled cost (wei) |
+|---|---|---|---:|---:|
+| `create_guard` | `0xf9ee9bfd1887874807f7167ce3cc912c7563e79fab9d4f316fcf024fb00707cb` | `FINALIZED / FINISHED_WITH_RETURN` | 378525600010352 | 78635500000823 |
+| `freeze_baseline` | `0x50b595188be73b74c3f312db07e5dbcb2776713ee57d7a1a6d31c3908fb0ca00` | `FINALIZED / FINISHED_WITH_RETURN` | 449029200010352 | 93323750000823 |
+| `assess_current` | `0x56958d8f7856bfc235c4170a3a24fd7ea7ecf20d3da7357409f9bf18716ed568` | `FINALIZED / FINISHED_WITH_RETURN` | 455246400010352 | 94619000000823 |
+
+Readback: guard `GUA-00000001` is `ACTIVE`; baseline is
+`BAS-GUA-00000001`; assessment is `ASM-00000001`, generation `1`, with one
+history entry. Technical status is `OK`; baseline and current evidence use
+source/effective URL
+`https://docs.genlayer.com/understand-genlayer-protocol/core-concepts/transactions/transaction-statuses.md`,
+SHA-256 `6affda7436ae97bde0668137f6dcde69c2fa4fc1502c1c22d6d0a6d95da4aaaf`,
+and 3223 exact UTF-8 bytes. The verdict is `NO_MATERIAL_CHANGE`; all six
+protected dimensions and `economic_term_changed` are false, and
+`evidence_sufficient=true`.
+
+Final account readback: balance `209293099048423801` wei, latest/pending nonce
+`150/150`. No extra deployment, qualification, transfer, faucet, or unrelated
+project write occurred. GitHub and Portal actions were not performed.
