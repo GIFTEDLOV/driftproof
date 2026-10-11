@@ -17,9 +17,12 @@
   "source_reproducible": true,
   "runner": {
     "pinned": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng",
+    "validation_bundle": "genlayerlabs/genvm-manager v0.6.0-rc6",
+    "linter_version": "0.11.1rc2",
     "sdk_setup": "pass against official cached GenVM v0.6.0-rc6 SDK paths",
     "contract_typecheck": "pass against v0.6.0-rc6 SDK paths",
-    "exact_pinned_runner_validation": "blocked: local genvm-linter cache lacks the pinned runner archive (E101)"
+    "exact_pinned_runner_validation": "pass with official GENVM_VERSION=v0.6.0-rc6 bundle",
+    "latest_bundle_diagnostic": "v0.6.0-rc9 intentionally rejects this older explicit pin with E101; rc6 contains the exact pinned runner"
   },
   "failed_deployments": [
     {
@@ -177,11 +180,12 @@
     "mutation_tests": "all_killed",
     "python_compile": "pass",
     "pyright": "pass against v0.6.0-rc6 SDK paths; direct default path lacks runtime stubs",
-    "genvm_lint": "pass_ast_lint; exact pinned runner validation blocked",
-    "semantic_validation": "blocked: E101 pinned runner archive unavailable locally",
-    "schema_check": "blocked: E101 pinned runner archive unavailable locally",
+    "genvm_lint": "pass (AST lint and official check with GENVM_VERSION=v0.6.0-rc6)",
+    "semantic_validation": "pass (official genvm-lint validate with GENVM_VERSION=v0.6.0-rc6)",
+    "schema_check": "pass (official genvm-lint schema; 11 methods, 8 views, 3 writes)",
+    "genvm_typecheck": "pass (official genvm-lint typecheck with GENVM_VERSION=v0.6.0-rc6)",
     "security_audit": "pass_offline; live deployment not performed",
     "secret_scan": "pass"
   },
-  "release_readiness": "NO-GO_PENDING_PINNED_RUNNER_VALIDATION_AND_AUTHORIZED_REDEPLOYMENT"
+  "release_readiness": "GO_FOR_SEPARATELY_AUTHORIZED_STUDIO_DEV_REDEPLOYMENT"
 }

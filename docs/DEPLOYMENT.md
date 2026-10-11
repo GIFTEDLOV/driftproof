@@ -18,7 +18,23 @@ Deployments #1 and #2 remain preserved in `docs/provenance/FAILED_DEPLOYMENT_FEE
 Before any separately authorized deployment:
 
 1. Confirm the release-candidate worktree is clean.
-2. Re-run contract tests, adversarial tests, state-machine/property tests, mutation checks, Python compile, Pyright or the documented limitation, GenVM lint, semantic validation, schema extraction, and secret scan.
+2. Re-run contract tests, adversarial tests, state-machine/property tests, mutation checks, Python compile, Pyright or the documented limitation, GenVM lint, semantic validation, schema extraction, and secret scan. For this pinned candidate, select the official bundle containing the pinned runner before invoking SDK-backed commands:
+
+   ```powershell
+   $env:GENVM_VERSION = "v0.6.0-rc6"
+   $genvmLint = "C:\Users\DELL\AppData\Local\Python\pythoncore-3.14-64\Scripts\genvm-lint.exe"
+   & $genvmLint setup --contract contracts/driftproof.py --json
+   & $genvmLint validate contracts/driftproof.py --json
+   & $genvmLint schema contracts/driftproof.py --json
+   & $genvmLint check contracts/driftproof.py --json
+   & $genvmLint typecheck contracts/driftproof.py --json
+   ```
+
+   The runner dependency line in `contracts/driftproof.py` remains the exact
+   pinned `py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng`;
+   `GENVM_VERSION` selects the official validation bundle and does not alter
+   the contract dependency hash. The latest rc9 bundle is not compatible with
+   this older explicit runner pin and correctly produces E101 if selected.
 3. Confirm `docs/provenance/RELEASE_MANIFEST.json` matches the committed contract blob SHA-256.
 4. Use the installed GenLayer CLI/Studio workflow for chain 61997. Do not use a different SDK family or a generated frontend.
 5. Pass the complete `fees.distribution` and `feeValue` object produced by the official estimator; do not use `--fee-value` alone.
