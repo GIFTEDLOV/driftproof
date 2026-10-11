@@ -32,3 +32,12 @@ else:
 
 Technical retrieval/model failures are recorded separately as `SOURCE_UNAVAILABLE`, `EVIDENCE_MISMATCH`, or `INCONCLUSIVE` and never pass through this business derivation as `NO_MATERIAL_CHANGE`.
 
+## Consensus result schema
+
+The eight booleans are only the semantic component of an assessment. The
+independently reproduced result also binds the guard ID, frozen baseline SHA-256,
+semantic schema version, top-level generation, technical status, and the complete
+evidence envelope. The evidence source URL, effective URL, UTF-8 content, SHA-256,
+exact byte length, and nested generation must all be mutually consistent. The
+observation timestamp is bounded provenance metadata and is intentionally excluded
+from the stable identity because validator wall clocks are not deterministic.

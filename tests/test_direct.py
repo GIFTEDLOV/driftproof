@@ -50,7 +50,7 @@ def test_contract_info_and_initial_state():
     assert info["guard_count"] == 1
     assert info["max_document_bytes"] == dp.MAX_DOCUMENT_BYTES
     assert info["public_method_count"] == 11
-    assert info["version"] == "0.1.1-rc1"
+    assert info["version"] == "0.1.2-rc1"
 
 
 def test_public_source_retrieval_uses_unsigned_default_get():

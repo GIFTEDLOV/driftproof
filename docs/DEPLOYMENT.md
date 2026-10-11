@@ -60,3 +60,64 @@ baseline and assessment. Generation `1` returned `NO_MATERIAL_CHANGE` with
 Settled costs were `78635500000823`, `93323750000823`, and `93992750000823`
 wei respectively. Final account state was balance `209638566798427093` wei
 and nonce `146/146`. `LIVE_QUALIFICATION=VERIFIED`.
+
+## Corrected `0.1.2-rc1` redeployment candidate
+
+This remediation is local-only. The corrected source has not been deployed, no
+Studio-dev transaction was sent, and Deployment #4 cannot be patched in place.
+The corrected candidate requires a new deployment and a fresh source/ABI parity
+check.
+
+The installed GenLayer CLI exposes the following read-only fee-estimation
+command:
+
+```powershell
+genlayer estimate-fees --rpc https://studio-dev.genlayer.com/api --json
+```
+
+Use the estimator output as the source of truth. The previously established
+complete deployment fee shape was:
+
+```json
+{
+  "distribution": {
+    "leaderTimeunitsAllocation": "100",
+    "validatorTimeunitsAllocation": "200",
+    "appealRounds": "0",
+    "executionBudgetPerRound": "25000000000000000",
+    "executionConsumed": "0",
+    "totalMessageFees": "0",
+    "rotations": ["3"],
+    "maxPriceGenPerTimeUnit": "2",
+    "storageFeeMaxGasPrice": "300000000",
+    "receiptFeeMaxGasPrice": "300000000"
+  },
+  "messageAllocations": [],
+  "feeValue": "100000000000010352"
+}
+```
+
+The installed CLI help verifies this deployment shape (`--fees` plus
+`--fee-value`); do not use `--fee-value` alone. After a separately authorized
+operator re-estimates and confirms every field, the prepared command is:
+
+```powershell
+genlayer deploy `
+  --contract contracts/driftproof.py `
+  --rpc https://studio-dev.genlayer.com/api `
+  --fees '{"distribution":{"leaderTimeunitsAllocation":"100","validatorTimeunitsAllocation":"200","appealRounds":"0","executionBudgetPerRound":"25000000000000000","executionConsumed":"0","totalMessageFees":"0","rotations":["3"],"maxPriceGenPerTimeUnit":"2","storageFeeMaxGasPrice":"300000000","receiptFeeMaxGasPrice":"300000000"},"messageAllocations":[]}' `
+  --fee-value 100000000000010352 `
+  --wallet keystore
+```
+
+Replace the fee values with the fresh estimator result if they differ. This
+command is prepared, not executed in this remediation.
+
+## Minimal live qualification after separate authorization
+
+1. Deploy the corrected source and record the actual deployment transaction and address.
+2. Read back source and ABI; verify parity with the committed source hash and the 11-method ABI.
+3. Call `create_guard` with the selected authority, exact HTTPS source URL, path prefix, protected dimensions, and byte limit; record its transaction hash.
+4. Call `freeze_baseline`; verify finality, `BASELINE_FROZEN`, source/effective URL, SHA-256, byte length, and content readback.
+5. Call `assess_current`; verify finality, technical status, evidence identity, verdict, generation, and readback history.
+6. Record the actual transaction hashes, deployment address, source hash, ABI parity, and final readback in a new provenance entry. Do not copy historical Deployment #4 hashes into the corrected release record.

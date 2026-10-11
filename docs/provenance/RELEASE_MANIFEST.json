@@ -1,18 +1,26 @@
 {
   "project": "DriftProof",
-  "release_candidate": "0.1.1-rc1",
+  "release_candidate": "0.1.2-rc1",
+  "starting_head": "f2e50fcdd62d1d62339c327926b6b3a89e76dd83",
   "contract": "contracts/driftproof.py",
   "semantic_schema": "DRIFTPROOF_SEMANTIC_V1",
   "max_document_bytes": 16384,
   "target_network": "Studio-dev",
   "target_chain_id": 61997,
-  "deployment_status": "deployment_4_live_qualification_verified",
+  "deployment_status": "corrected_source_not_deployed",
   "github_status": "not_created_or_pushed",
-  "contract_sha256": "dd99595a3cb50392b4ec991b7ccb3f2ffa275fc77e14cac5628ed75a4a3aca99",
-  "deployed_contract_sha256": "dd99595a3cb50392b4ec991b7ccb3f2ffa275fc77e14cac5628ed75a4a3aca99",
+  "contract_sha256": "2f0e270f76b22b788b18dc2572ef400f329cbdbd32c8fd4fb06f9430c2acf0b6",
+  "deployed_contract_sha256": null,
+  "historical_deployment_4_contract_sha256": "dd99595a3cb50392b4ec991b7ccb3f2ffa275fc77e14cac5628ed75a4a3aca99",
   "historical_deployment_3_contract_sha256": "82d2f653dde89c8b44176e696f970563f34502f14622151f669251c912cf6e0b",
-  "git_blob_sha1": "8289069b4b41ff7746c706b8bed74136784a891a",
+  "git_blob_sha1": "220e4ca57b8cb088acfe4c5fff8fc02ba05766d7",
   "source_reproducible": true,
+  "runner": {
+    "pinned": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng",
+    "sdk_setup": "pass against official cached GenVM v0.6.0-rc6 SDK paths",
+    "contract_typecheck": "pass against v0.6.0-rc6 SDK paths",
+    "exact_pinned_runner_validation": "blocked: local genvm-linter cache lacks the pinned runner archive (E101)"
+  },
   "failed_deployments": [
     {
     "tx_hash": "0x5297032368b68291e0b82784a4f860b8e9bc64f7b53bd8d89fcd42b8a8960d78",
@@ -140,7 +148,18 @@
     "final_nonce_latest": 146,
     "final_nonce_pending": 146
   },
-  "runtime_fix_candidate": {
+  "corrected_release": {
+    "version": "0.1.2-rc1",
+    "root_cause_class": "INCOMPLETE_ASSESSMENT_EQUIVALENCE_IDENTITY",
+    "change": "bind complete canonical retrieval and assessment results during independent validation",
+    "semantic_schema_changed": false,
+    "abi_changed": false,
+    "deployment_required": true,
+    "deployed": false,
+    "historical_source_not_equivalent": true,
+    "historical_deployment_4_sha256": "dd99595a3cb50392b4ec991b7ccb3f2ffa275fc77e14cac5628ed75a4a3aca99"
+  },
+  "historical_runtime_fix_deployment_4": {
     "version": "0.1.1-rc1",
     "root_cause_class": "SIGNED_WEB_REQUEST_PATH_INCOMPATIBLE_OR_UNRELIABLE_ON_CURRENT_STUDIO_DEV",
     "change": "omit sign=True from public gl.nondet.web.get",
@@ -151,15 +170,18 @@
     "deployment_number": 4
   },
   "gates": {
-    "contract_tests": "pass",
+    "contract_tests": "pass (217)",
     "adversarial_tests": "pass",
+    "consensus_regression_tests": "pass (22 new)",
     "property_tests": "pass",
     "mutation_tests": "all_killed",
     "python_compile": "pass",
-    "pyright": "pass_with_installed_genvm_sdk_path",
-    "genvm_lint": "pass",
-    "semantic_validation": "pass",
-    "schema_check": "pass",
+    "pyright": "pass against v0.6.0-rc6 SDK paths; direct default path lacks runtime stubs",
+    "genvm_lint": "pass_ast_lint; exact pinned runner validation blocked",
+    "semantic_validation": "blocked: E101 pinned runner archive unavailable locally",
+    "schema_check": "blocked: E101 pinned runner archive unavailable locally",
+    "security_audit": "pass_offline; live deployment not performed",
     "secret_scan": "pass"
-  }
+  },
+  "release_readiness": "NO-GO_PENDING_PINNED_RUNNER_VALIDATION_AND_AUTHORIZED_REDEPLOYMENT"
 }

@@ -24,7 +24,7 @@ u256 = gl.u256
 
 
 NAME = "DriftProof"
-VERSION = "0.1.1-rc1"
+VERSION = "0.1.2-rc1"
 SEMANTIC_SCHEMA = "DRIFTPROOF_SEMANTIC_V1"
 MAX_DOCUMENT_BYTES = 16_384
 MAX_URL_BYTES = 1_024
@@ -56,6 +56,39 @@ SEMANTIC_KEYS = (
 )
 PROTECTED_KEYS = SEMANTIC_KEYS[:7]
 TECHNICAL_STATES = (OK, INCONCLUSIVE, SOURCE_UNAVAILABLE, EVIDENCE_MISMATCH)
+EVIDENCE_KEYS = (
+    "source_url",
+    "effective_url",
+    "content_sha256",
+    "exact_byte_length",
+    "content",
+    "observed_at",
+    "generation",
+)
+EVIDENCE_IDENTITY_KEYS = (
+    "source_url",
+    "effective_url",
+    "content_sha256",
+    "exact_byte_length",
+    "content",
+    "generation",
+)
+EVIDENCE_REPLAY_KEYS = (
+    "source_url",
+    "effective_url",
+    "content_sha256",
+    "exact_byte_length",
+)
+RETRIEVAL_RESULT_KEYS = ("technical_status", "evidence")
+ASSESSMENT_RESULT_KEYS = (
+    "guard_id",
+    "baseline_sha256",
+    "semantic_schema",
+    "generation",
+    "technical_status",
+    "vector",
+    "evidence",
+)
 
 
 def _fail(code: str) -> typing.NoReturn:
@@ -249,6 +282,136 @@ def _empty_evidence(source_url: str, observed_at: str, generation: int) -> dict[
     }
 
 
+def _valid_observation_timestamp(value: typing.Any) -> bool:
+    """Observation time is provenance only, not a consensus identity field.
+
+    GenVM nodes can observe the same source at different wall-clock times.  The
+    timestamp is therefore validated as bounded historical metadata, stored from
+    the leader observation, and deliberately excluded from consensus identity,
+    replay keys, and verdict derivation.
+    """
+    if type(value) is not str or _byte_len(value) > 128:
+        return False
+    return all(ord(character) >= 32 and ord(character) != 127 for character in value)
+
+
+def _validate_evidence(
+    raw: typing.Any,
+    guard: dict[str, typing.Any],
+    generation: int,
+    technical_status: str,
+) -> dict[str, typing.Any] | None:
+    """Validate and normalize the complete evidence envelope.
+
+    A complete result must prove that the stored text, byte length, and digest
+    describe the same UTF-8 bytes.  Failure states intentionally carry an empty
+    evidence envelope, while INCONCLUSIVE carries the valid retrieval evidence
+    that was available before model evaluation failed.
+    """
+    try:
+        if type(raw) is not dict or set(raw.keys()) != set(EVIDENCE_KEYS):
+            return None
+        source_url = raw.get("source_url")
+        effective_url = raw.get("effective_url")
+        content_sha256 = raw.get("content_sha256")
+        exact_byte_length = raw.get("exact_byte_length")
+        content = raw.get("content")
+        observed_at = raw.get("observed_at")
+        evidence_generation = raw.get("generation")
+        if type(source_url) is not str or source_url != guard.get("baseline_url"):
+            return None
+        if type(effective_url) is not str or type(content_sha256) is not str:
+            return None
+        if type(exact_byte_length) is not int or type(evidence_generation) is not int:
+            return None
+        if type(content) is not str or not _valid_observation_timestamp(observed_at):
+            return None
+        if evidence_generation != generation:
+            return None
+
+        normalized_sha = content_sha256
+        if normalized_sha != "":
+            normalized_sha = _validate_sha256(normalized_sha)
+
+        if technical_status in (SOURCE_UNAVAILABLE, EVIDENCE_MISMATCH):
+            if effective_url != "" or normalized_sha != "" or exact_byte_length != 0 or content != "":
+                return None
+            return {
+                "source_url": source_url,
+                "effective_url": "",
+                "content_sha256": "",
+                "exact_byte_length": 0,
+                "content": "",
+                "observed_at": observed_at,
+                "generation": evidence_generation,
+            }
+
+        if effective_url == "" or normalized_sha == "" or content == "":
+            return None
+        final = _normalize_url(effective_url)
+        if final["url"] != effective_url:
+            return None
+        if final["host"] != guard.get("authority_host") or not _path_matches(
+            final["path"], str(guard.get("authority_path_prefix", ""))
+        ):
+            return None
+        encoded_content = content.encode("utf-8")
+        if len(encoded_content) == 0 or len(encoded_content) > int(guard["max_document_bytes"]):
+            return None
+        if exact_byte_length != len(encoded_content):
+            return None
+        if normalized_sha != hashlib.sha256(encoded_content).hexdigest():
+            return None
+        return {
+            "source_url": source_url,
+            "effective_url": effective_url,
+            "content_sha256": normalized_sha,
+            "exact_byte_length": exact_byte_length,
+            "content": content,
+            "observed_at": observed_at,
+            "generation": evidence_generation,
+        }
+    except Exception:
+        return None
+
+
+def _validate_retrieval_result(
+    raw: typing.Any, guard: dict[str, typing.Any], generation: int
+) -> dict[str, typing.Any] | None:
+    try:
+        if type(raw) is not dict or set(raw.keys()) != set(RETRIEVAL_RESULT_KEYS):
+            return None
+        technical_status = raw.get("technical_status")
+        if type(technical_status) is not str or technical_status not in TECHNICAL_STATES:
+            return None
+        evidence = _validate_evidence(raw.get("evidence"), guard, generation, technical_status)
+        if evidence is None:
+            return None
+        return {"technical_status": technical_status, "evidence": evidence}
+    except Exception:
+        return None
+
+
+def _retrieval_identity(result: dict[str, typing.Any]) -> dict[str, typing.Any]:
+    evidence = typing.cast(dict[str, typing.Any], result["evidence"])
+    return {
+        "technical_status": result["technical_status"],
+        "evidence": {key: evidence[key] for key in EVIDENCE_IDENTITY_KEYS},
+    }
+
+
+def _same_retrieval(
+    left: typing.Any, right: typing.Any, guard: dict[str, typing.Any], generation: int
+) -> bool:
+    left_result = _validate_retrieval_result(left, guard, generation)
+    right_result = _validate_retrieval_result(right, guard, generation)
+    return (
+        left_result is not None
+        and right_result is not None
+        and _canonical(_retrieval_identity(left_result)) == _canonical(_retrieval_identity(right_result))
+    )
+
+
 def _retrieve_document(guard: dict[str, typing.Any], generation: int) -> dict[str, typing.Any]:
     source_url = str(guard["baseline_url"])
     observed_at = _now()
@@ -338,17 +501,107 @@ def _semantic_once(guard: dict[str, typing.Any], baseline: dict[str, typing.Any]
         except Exception:
             technical_status = INCONCLUSIVE
     return {
+        "guard_id": str(guard["guard_id"]),
+        "baseline_sha256": str(baseline["content_sha256"]),
+        "semantic_schema": SEMANTIC_SCHEMA,
+        "generation": generation,
         "technical_status": technical_status,
         "vector": vector,
         "evidence": evidence,
     }
 
 
-def _same_vector(left: typing.Any, right: typing.Any) -> bool:
-    left_vector = _validate_vector(left.get("vector")) if isinstance(left, dict) else None
-    right_vector = _validate_vector(right.get("vector")) if isinstance(right, dict) else None
-    return left_vector is not None and right_vector is not None and all(
-        left_vector[key] is right_vector[key] for key in SEMANTIC_KEYS
+def _validate_assessment_result(
+    raw: typing.Any,
+    guard: dict[str, typing.Any],
+    baseline: dict[str, typing.Any],
+    generation: int,
+) -> dict[str, typing.Any] | None:
+    try:
+        if type(raw) is not dict or set(raw.keys()) != set(ASSESSMENT_RESULT_KEYS):
+            return None
+        guard_id = raw.get("guard_id")
+        baseline_sha256 = raw.get("baseline_sha256")
+        semantic_schema = raw.get("semantic_schema")
+        result_generation = raw.get("generation")
+        technical_status = raw.get("technical_status")
+        if guard_id != guard.get("guard_id") or type(guard_id) is not str:
+            return None
+        if type(baseline_sha256) is not str or type(baseline.get("content_sha256")) is not str:
+            return None
+        if _validate_sha256(baseline_sha256) != _validate_sha256(baseline["content_sha256"]):
+            return None
+        if semantic_schema != SEMANTIC_SCHEMA or type(semantic_schema) is not str:
+            return None
+        if type(result_generation) is not int or result_generation != generation:
+            return None
+        if type(technical_status) is not str or technical_status not in TECHNICAL_STATES:
+            return None
+        vector = _validate_vector(raw.get("vector"))
+        if vector is None:
+            return None
+        if technical_status != OK and vector != _empty_vector():
+            return None
+        evidence = _validate_evidence(raw.get("evidence"), guard, generation, technical_status)
+        if evidence is None:
+            return None
+        return {
+            "guard_id": guard_id,
+            "baseline_sha256": _validate_sha256(baseline_sha256),
+            "semantic_schema": semantic_schema,
+            "generation": result_generation,
+            "technical_status": technical_status,
+            "vector": vector,
+            "evidence": evidence,
+        }
+    except Exception:
+        return None
+
+
+def _assessment_identity(result: dict[str, typing.Any]) -> dict[str, typing.Any]:
+    evidence = typing.cast(dict[str, typing.Any], result["evidence"])
+    return {
+        "guard_id": result["guard_id"],
+        "baseline_sha256": result["baseline_sha256"],
+        "semantic_schema": result["semantic_schema"],
+        "generation": result["generation"],
+        "technical_status": result["technical_status"],
+        "vector": result["vector"],
+        "evidence": {key: evidence[key] for key in EVIDENCE_IDENTITY_KEYS},
+    }
+
+
+def _same_assessment(
+    left: typing.Any,
+    right: typing.Any,
+    guard: dict[str, typing.Any],
+    baseline: dict[str, typing.Any],
+    generation: int,
+) -> bool:
+    left_result = _validate_assessment_result(left, guard, baseline, generation)
+    right_result = _validate_assessment_result(right, guard, baseline, generation)
+    return (
+        left_result is not None
+        and right_result is not None
+        and _canonical(_assessment_identity(left_result)) == _canonical(_assessment_identity(right_result))
+    )
+
+
+def _assessment_replay_key(
+    guard_id: str, baseline_sha256: str, result: dict[str, typing.Any]
+) -> str:
+    evidence = typing.cast(dict[str, typing.Any], result["evidence"])
+    return _canonical(
+        {
+            "guard_id": guard_id,
+            "baseline_sha256": baseline_sha256,
+            "technical_status": result["technical_status"],
+            # Deliberately omit generation, timestamp, and vector: the same
+            # observed document/status must not be result-shopped across writes.
+            # Content is already cryptographically bound by its verified SHA.
+            "evidence": {key: evidence[key] for key in EVIDENCE_REPLAY_KEYS},
+            "schema": SEMANTIC_SCHEMA,
+        }
     )
 
 
@@ -467,25 +720,17 @@ class DriftProof(gl.contract.Contract):
                 return False
             try:
                 independent = _retrieve_document(guard, 0)
-                left = leader_result.calldata
-                right = independent
-                if left.get("technical_status") != right.get("technical_status"):
-                    return False
-                left_evidence = left.get("evidence", {})
-                right_evidence = right.get("evidence", {})
-                return all(
-                    left_evidence.get(key) == right_evidence.get(key)
-                    for key in ("content_sha256", "exact_byte_length", "content")
-                )
+                return _same_retrieval(leader_result.calldata, independent, guard, 0)
             except Exception:
                 return False
 
         retrieved = gl.vm.run_nondet(leader, validator)
-        if not isinstance(retrieved, dict):
+        validated_retrieval = _validate_retrieval_result(retrieved, guard, 0)
+        if validated_retrieval is None:
             _fail("MALFORMED_BASELINE_RETRIEVAL")
-        if retrieved["technical_status"] != OK:
-            _fail(str(retrieved["technical_status"]))
-        evidence = typing.cast(dict[str, typing.Any], retrieved["evidence"])
+        if validated_retrieval["technical_status"] != OK:
+            _fail(str(validated_retrieval["technical_status"]))
+        evidence = typing.cast(dict[str, typing.Any], validated_retrieval["evidence"])
         baseline_id = "BAS-" + guard_id
         baseline = {
             "baseline_id": baseline_id,
@@ -522,34 +767,27 @@ class DriftProof(gl.contract.Contract):
                 return False
             try:
                 independent = _semantic_once(guard, baseline, generation)
-                return _same_vector(leader_result.calldata, independent)
+                return _same_assessment(
+                    leader_result.calldata,
+                    independent,
+                    guard,
+                    baseline,
+                    generation,
+                )
             except Exception:
                 return False
 
         consensus_result = gl.vm.run_nondet(leader, validator)
-        if not isinstance(consensus_result, dict):
-            _fail("MALFORMED_CONSENSUS_RESULT")
-        vector = _validate_vector(consensus_result.get("vector"))
-        if vector is None:
-            _fail("MALFORMED_SEMANTIC_VECTOR")
-        technical_status = str(consensus_result.get("technical_status", INCONCLUSIVE))
-        if technical_status not in TECHNICAL_STATES:
-            _fail("MALFORMED_TECHNICAL_STATUS")
-        evidence = consensus_result.get("evidence")
-        if type(evidence) is not dict:
-            _fail("MALFORMED_CURRENT_EVIDENCE")
-        current_sha = str(evidence.get("content_sha256", ""))
-        if current_sha != "":
-            current_sha = _validate_sha256(current_sha)
-        duplicate_key = _canonical(
-            {
-                "guard_id": guard_id,
-                "baseline_sha256": baseline["content_sha256"],
-                "current_sha256": current_sha,
-                "technical_status": technical_status,
-                "schema": SEMANTIC_SCHEMA,
-            }
+        validated_result = _validate_assessment_result(
+            consensus_result, guard, baseline, generation
         )
+        if validated_result is None:
+            _fail("MALFORMED_CONSENSUS_RESULT")
+        vector = typing.cast(dict[str, bool], validated_result["vector"])
+        technical_status = typing.cast(str, validated_result["technical_status"])
+        evidence = typing.cast(dict[str, typing.Any], validated_result["evidence"])
+        current_sha = typing.cast(str, evidence["content_sha256"])
+        duplicate_key = _assessment_replay_key(guard_id, baseline["content_sha256"], validated_result)
         if self.duplicate_keys.get(duplicate_key) is not None:
             _fail("DUPLICATE_OR_REPLAYED_ASSESSMENT")
         assessment_number = int(self.assessment_count) + 1
@@ -557,9 +795,7 @@ class DriftProof(gl.contract.Contract):
         identity = {
             "guard_id": guard_id,
             "baseline_sha256": baseline["content_sha256"],
-            "current_sha256": current_sha,
-            "generation": generation,
-            "semantic_schema_version": SEMANTIC_SCHEMA,
+            "assessment": _assessment_identity(validated_result),
         }
         assessment = {
             "assessment_id": assessment_id,
