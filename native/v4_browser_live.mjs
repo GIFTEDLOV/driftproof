@@ -11,7 +11,14 @@ try{
   let errors=[];page.on('pageerror',e=>errors.push(String(e).slice(0,250)));
   await page.goto(app.url,{waitUntil:'domcontentloaded',timeout:35000});
   await page.waitForTimeout(2200);
-  await page.locator(`nav button[data-page="${app.tab}"]`).click();
+  const navSelector=`nav button[data-page="${app.tab}"]`;
+  let visible=false;
+  for(let attempt=0;attempt<3;attempt++){
+    if(await page.locator(navSelector).count()){visible=true;break;}
+    if(attempt<2){await page.reload({waitUntil:'domcontentloaded',timeout:35000});await page.waitForTimeout(1500);}
+  }
+  if(!visible)throw Error('LIVE_DOM_MISSING_NAV: '+JSON.stringify({url:page.url(),title:await page.title(),nav:await page.locator('nav').count(),head:(await page.locator('body').innerText()).slice(0,500)}));
+  await page.locator(navSelector).click({timeout:15000});
   await page.locator('#case-filter').waitFor({timeout:20000});
   await page.waitForFunction((id)=>document.querySelector('#main-content')?.innerText?.includes(id)||document.querySelector('#main-content')?.innerText?.includes('Live read failed:'),app.known,{timeout:55000});
   const cases=await page.locator('#main-content').innerText();
