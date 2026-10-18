@@ -27,6 +27,11 @@ jobs:
               if f.name.endswith('deployed-code.txt'): continue
               content=f.read_text(errors='replace')
               print('===',f.name,'lines',len(content.splitlines()),'===')
+              if f.name in ('create.log','schema.txt'):
+                  print('BEGIN_HEAD')
+                  for line in content.splitlines()[:75]:
+                    if len(line)<450: print(line[:425])
+                  print('END_HEAD')
               for l in content.splitlines():
                   s=l.strip()
                   if len(s)>500:continue
