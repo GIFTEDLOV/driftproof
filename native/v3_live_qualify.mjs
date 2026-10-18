@@ -1,5 +1,6 @@
 /** Real Studionet three-actor qualification. Never log secrets or retry after a tx ID. */
-import {createClient, createAccount, isSuccessful} from 'genlayer-js';
+import {createClient, createAccount} from 'genlayer-js';
+const isSuccessful=tx=>tx?.statusName==='FINALIZED' && tx?.txExecutionResultName==='FINISHED_WITH_RETURN';
 import {studionet} from 'genlayer-js/chains';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
