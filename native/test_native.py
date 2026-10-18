@@ -15,6 +15,10 @@ MODEL = [{}]
 class Return:
     def __init__(self, calldata): self.calldata=calldata
 
+class Address(str):
+    @property
+    def as_hex(self): return str(self)
+
 class StubContract:
     def __new__(cls, *args, **kwargs):
         obj = object.__new__(cls)
@@ -39,7 +43,7 @@ gl=types.SimpleNamespace(
     vm=types.SimpleNamespace(UserError=UError, Return=Return, run_nondet_unsafe=nondet),
     nondet=types.SimpleNamespace(exec_prompt=exec_prompt),
     public=types.SimpleNamespace(view=lambda fn:fn,write=lambda fn:fn))
-sdk.gl=gl;sdk.TreeMap=dict;sdk.DynArray=list
+sdk.gl=gl;sdk.TreeMap=dict;sdk.DynArray=list;sdk.Address=Address
 sys.modules['genlayer']=sdk
 
 class ContractTest(unittest.TestCase):
@@ -61,7 +65,7 @@ class ContractTest(unittest.TestCase):
         self.actor('0x'+'a'*40)
         mod=self.modules[slug]
         obj=getattr(mod,self.names[slug])()
-        args=['CASE-1','0x'+'b'*40,'FROZEN AGREEMENT: entitlement requires documented criteria and consent.',TIMESTAMP[0]+3600]
+        args=['CASE-1',Address('0x'+'b'*40),'FROZEN AGREEMENT: entitlement requires documented criteria and consent.',TIMESTAMP[0]+3600]
         if slug=='invoicebasis':args.extend([999,1,3])
         if slug=='shiftfair':args.extend([120,90])
         obj.create_case(*args)
@@ -69,7 +73,7 @@ class ContractTest(unittest.TestCase):
 
     def prepare(self,slug):
         obj,mod=self.case(slug)
-        self.actor('0x'+'b'*40);obj.consent('CASE-1')
+        self.actor(Address('0x'+'b'*40));obj.consent('CASE-1')
         self.actor('0x'+'a'*40);obj.freeze('CASE-1')
         obj.submit_evidence('CASE-1','Frozen policy and two-party supporting evidence, signed by the submitting actor.')
         MODEL[0]=self.models[slug]
@@ -83,7 +87,7 @@ class ContractTest(unittest.TestCase):
                 with self.assertRaises(UError):obj.freeze('CASE-1')
                 self.actor('0x'+'c'*40)
                 with self.assertRaises(UError):obj.consent('CASE-1')
-                self.actor('0x'+'b'*40);obj.consent('CASE-1')
+                self.actor(Address('0x'+'b'*40));obj.consent('CASE-1')
                 self.actor('0x'+'a'*40);obj.freeze('CASE-1')
                 self.assertEqual(json.loads(obj.get_case('CASE-1'))['status'],'FROZEN')
 
@@ -100,7 +104,7 @@ class ContractTest(unittest.TestCase):
             with self.subTest(slug=slug):
                 obj,mod=self.case(slug)
                 self.actor('0x'+'a'*40)
-                with self.assertRaises(UError): obj.create_case('CASE-1','0x'+'b'*40,'Agreement',TIMESTAMP[0]+3600,*([10,1,2] if slug=='invoicebasis' else [10,20] if slug=='shiftfair' else []))
+                with self.assertRaises(UError): obj.create_case('CASE-1',Address('0x'+'b'*40),'Agreement',TIMESTAMP[0]+3600,*([10,1,2] if slug=='invoicebasis' else [10,20] if slug=='shiftfair' else []))
 
     def test_bounded_semantics_and_frozen_evidence(self):
         for slug in self.names:
@@ -154,7 +158,7 @@ class ContractTest(unittest.TestCase):
             with self.subTest(slug=slug):
                 self.actor('0x'+'a'*40)
                 obj=getattr(self.modules[slug],self.names[slug])()
-                args=['expired','0x'+'b'*40,'terms',TIMESTAMP[0]-1]
+                args=['expired',Address('0x'+'b'*40),'terms',TIMESTAMP[0]-1]
                 if slug=='invoicebasis':args.extend([1,1,2])
                 if slug=='shiftfair':args.extend([10,20])
                 with self.assertRaises(UError):obj.create_case(*args)
@@ -166,7 +170,7 @@ class ContractTest(unittest.TestCase):
             with self.subTest(slug=slug):
                 self.actor('0x'+'a'*40)
                 obj=getattr(self.modules[slug],self.names[slug])()
-                args=['negative','0x'+'b'*40,'terms',TIMESTAMP[0]+3600]
+                args=['negative',Address('0x'+'b'*40),'terms',TIMESTAMP[0]+3600]
                 args.extend([-1,1,2] if slug=='invoicebasis' else [-1,20])
                 with self.assertRaises(UError):obj.create_case(*args)
 
