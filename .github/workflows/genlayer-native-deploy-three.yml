@@ -1,0 +1,69 @@
+name: GenLayer Native Three-Contract Studionet Deploy
+on:
+  push:
+    branches:
+      - workbench/genlayer-four-native-20261018
+    paths:
+      - '.github/workflows/genlayer-native-deploy-three.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  deploy-three:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install CLI and select verified network
+        run: |
+          npm install --global genlayer
+          genlayer network set studionet
+          genlayer network info
+      - name: Initialize restricted ephemeral gasless signer
+        run: |
+          set -euo pipefail
+          SECRET="$(openssl rand -hex 32)"
+          echo "::add-mask::$SECRET"
+          echo "GENLAYER_CI_PASSWORD=$SECRET" >> "$GITHUB_ENV"
+          genlayer account create --name native-multi-ci --password "$SECRET" >/dev/null 2>/tmp/ci-signer-error.txt
+          genlayer account use native-multi-ci >/dev/null
+          genlayer account | grep -Ei 'address|network' || true
+      - name: Deploy three distinct contracts exactly once each
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p live-proof
+          for app in invoicebasis parcelcourt shiftfair; do
+            echo "BEGIN $app"
+            if ! printf '%s\n' "$GENLAYER_CI_PASSWORD" | genlayer deploy --contract "native/$app/contracts/$app.py" >"live-proof/$app-deploy.log" 2>&1; then
+              echo "FAIL $app: command or execution not verified. No retry."
+              grep -Ei 'error|failed|runner|execution|timeout|invalid' "live-proof/$app-deploy.log" | cut -c 1-250 | tail -n 14 || true
+              exit 1
+            fi
+            APP="$app" node <<'NODE'
+          const fs=require('fs');
+          const name=process.env.APP;
+          const s=fs.readFileSync('live-proof/'+name+'-deploy.log','utf8');
+          const tx=Array.from(s.matchAll(/'Transaction Hash':\s*'(0x[a-fA-F0-9]{64})'/g)).at(-1)?.[1];
+          const address=Array.from(s.matchAll(/'Contract Address':\s*'(0x[a-fA-F0-9]{40})'/g)).at(-1)?.[1];
+          const executionSuccess=/execution_result:\s*'SUCCESS'/.test(s);
+          const cliSuccess=/Contract deployed successfully/i.test(s);
+          const proof={name,network:'studionet',chainId:61999,transactionHash:tx||null,address:address||null,executionSuccess,cliSuccess,status:'DEPLOYED_UNQUALIFIED',sourceCommit:process.env.GITHUB_SHA};
+          fs.writeFileSync('live-proof/'+name+'-summary.json',JSON.stringify(proof,null,2)+'\n');
+          console.log(JSON.stringify(proof));
+          if(!(tx && address && executionSuccess && cliSuccess))process.exit(1);
+          NODE
+            echo "END $app"
+            sleep 6
+          done
+      - name: Preserve sanitised live proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genlayer-three-deployment-proof
+          path: live-proof/*-summary.json
+          if-no-files-found: warn
+          retention-days: 30
