@@ -1,5 +1,5 @@
 # { "Depends": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6" }
-"""InvoiceBasis: bounded semantic invoice eligibility and deterministic royalty arithmetic.
+"""NoticeClock: frozen notice/cure requirement and independent semantic delivery review.
 
 Consensus trust model: the leader interprets externally attested (on-chain signer) text; validators
 independently re-run that question and compare the complete strict boolean vector.
@@ -11,9 +11,9 @@ import json
 import hashlib
 from datetime import datetime, timezone
 
-NAME = "InvoiceBasis"
-SCHEMA = "INVOICEBASIS_V3"
-KEYS = ('in_eligible_class', 'exclusion_applies', 'evidence_sufficient')
+NAME = "NoticeClock"
+SCHEMA = "NOTICECLOCK_V4"
+KEYS = ('breach_identified', 'clause_applicable', 'requested_cure_clear', 'evidence_sufficient')
 MAX_TEXT = 4096
 MAX_RULE = 2048
 MAX_ID = 96
@@ -100,7 +100,7 @@ def _semantic_consensus(rule: str, evidence: str, binding: str, challenge: str =
     agreed = gl.vm.run_nondet_unsafe(answer, validator)
     return _parse_vector(agreed)
 
-class InvoiceBasis(gl.Contract):
+class NoticeClock(gl.Contract):
     owner: str
     cases: TreeMap[str, str]
     histories: TreeMap[str, str]
@@ -120,23 +120,19 @@ class InvoiceBasis(gl.Contract):
         self.cases[r['id']] = _canon(r)
 
     @gl.public.write
-    def create_case(self, case_id: str, recipient: Address, frozen_clause: str, deadline: int, gross_minor: int, rate_num: int, rate_den: int, attestor: Address) -> str:
+    def create_case(self, case_id: str, recipient: Address, frozen_clause: str, deadline: int, attestor: Address) -> str:
         _id(case_id)
         _check_string(frozen_clause, MAX_RULE)
         if self.cases.get(case_id, ''):
             _fail('DUPLICATE_CASE')
         if type(deadline) is not int or deadline <= _now() or deadline > _now()+31536000:
             _fail('BAD_DEADLINE')
-        recipient_hex = recipient.as_hex.lower()
+        recipient_hex = (recipient if isinstance(recipient, str) else recipient.as_hex).lower()
         _check_string(recipient_hex, 42)
         if not (recipient_hex.startswith('0x') and len(recipient_hex)==42 and all(c in '0123456789abcdef' for c in recipient_hex[2:])) or recipient_hex==_sender():
-            _fail('BAD_PAYER')
-        if type(gross_minor) is not int or type(rate_num) is not int or type(rate_den) is not int:
-            _fail('BAD_NUMERIC_TYPE')
-        if not (0 < gross_minor <= 10**24 and 0 <= rate_num <= rate_den <= 10**12 and rate_den > 0):
-            _fail('BAD_AMOUNT_OR_RATE')
+            _fail('BAD_RECIPIENT')
 
-        attestor_hex = attestor.as_hex.lower()
+        attestor_hex = (attestor if isinstance(attestor, str) else attestor.as_hex).lower()
         _check_string(attestor_hex, 42)
         if (not (attestor_hex.startswith('0x') and len(attestor_hex)==42 and
                  all(c in '0123456789abcdef' for c in attestor_hex[2:])) or
@@ -144,11 +140,7 @@ class InvoiceBasis(gl.Contract):
                 attestor_hex == '0x'+'0'*40):
             _fail('BAD_ATTESTOR')
         record = {'id':case_id, 'creator':_sender(), 'recipient':recipient_hex, 'rule':frozen_clause, 'deadline':deadline, 'status':'DRAFT', 'consented':False, 'evidence':'', 'evidence_hash':'', 'round':0, 'result':'', 'created':_now(), 'last_at':0, 'attestor':attestor_hex, 'attested':False, 'attestation_hash':'', 'source_ref':'', 'challenge_text':'', 'challenge_hash':'', 'challenges':[], 'finalized_at':0}
-        record['gross_minor'] = gross_minor
-        record['rate_num'] = rate_num
-        record['rate_den'] = rate_den
-        record['payable_minor'] = 0
-        record['provisional_payable_minor'] = 0
+        record['cure_deadline'] = deadline
 
         self._store(record)
         self.case_ids.append(case_id)
@@ -220,10 +212,10 @@ class InvoiceBasis(gl.Contract):
     def _verdict(self, vector: dict[str, bool]) -> str:
 
         if not vector['evidence_sufficient']:
-            return 'REVIEW_REQUIRED'
-        if vector['exclusion_applies'] or not vector['in_eligible_class']:
-            return 'INELIGIBLE'
-        return 'ELIGIBLE'
+            return 'INCONCLUSIVE'
+        if vector['breach_identified'] and vector['clause_applicable'] and vector['requested_cure_clear']:
+            return 'READY'
+        return 'INVALID'
 
 
     @gl.public.write
@@ -273,7 +265,6 @@ class InvoiceBasis(gl.Contract):
         record['status'] = 'ASSESSED'
         record['result'] = verdict
         record['last_at'] = _now()
-        record['provisional_payable_minor'] = (record['gross_minor'] * record['rate_num'] // record['rate_den']) if verdict=='ELIGIBLE' else 0
 
         audit = json.loads(self.histories[case_id])
         audit.append({'round':record['round'], 'vector':vector,'verdict':verdict,
@@ -313,7 +304,6 @@ class InvoiceBasis(gl.Contract):
         record['status'] = 'FINALIZED'
         record['finalized_at'] = _now()
         record['finalized_by'] = _sender()
-        record['payable_minor'] = record['provisional_payable_minor']
         self._store(record)
         return record['result']
 

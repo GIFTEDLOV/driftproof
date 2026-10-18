@@ -1,0 +1,23 @@
+name: NoticeClock - Exact Source CI
+on: [push, pull_request, workflow_dispatch]
+permissions: {contents: read}
+jobs:
+  lint-and-adversarial-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Pinned V4 SHA and source compile
+        run: |
+          echo 'b968431218e2b8e1e24264a13a81c9cadde7a2d321e661df50e907dbed545e13  contracts/noticeclock.py' | sha256sum -c -
+          python -m py_compile contracts/noticeclock.py
+      - name: Adversarial regression
+        run: python -m unittest discover -s tests -p test_contract.py -v
+      - name: GenVM lint and public schema
+        run: |
+          python -m pip install --disable-pip-version-check genvm-linter
+          genvm-lint check contracts/noticeclock.py
+          genvm-lint schema contracts/noticeclock.py --json > /tmp/schema.json
+          test -s /tmp/schema.json

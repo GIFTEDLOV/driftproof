@@ -1,2 +1,0 @@
-"""DriftProof test package."""
-
