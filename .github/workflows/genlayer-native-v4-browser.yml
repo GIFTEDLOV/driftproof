@@ -1,0 +1,30 @@
+name: GenLayer V4 Browser SDK Compatibility
+on:
+  push:
+    branches: [workbench/genlayer-four-native-20261018]
+    paths:
+      - 'native/*/web/hardening_v4/**'
+      - 'native/test_v4_frontend.mjs'
+      - '.github/workflows/genlayer-native-v4-browser.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-sdk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Check both V4 adapters and failure gates
+        run: |
+          set -euo pipefail
+          node --check native/parcelcourt/web/hardening_v4/onchain.js
+          node --check native/shiftfair/web/hardening_v4/onchain.js
+          node --test native/test_v4_frontend.mjs
+      - name: Verify GenLayerJS runtime exports against pinned 1.1.8
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-audit --no-fund genlayer-js@1.1.8
+          node --input-type=module -e "import {createClient} from 'genlayer-js';import {TransactionStatus} from 'genlayer-js/types'; if(typeof createClient!=='function'||!TransactionStatus.FINALIZED) process.exit(1); console.log('SDK_EXPORTS_PASS')"
