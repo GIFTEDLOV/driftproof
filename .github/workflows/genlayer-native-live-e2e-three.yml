@@ -1,0 +1,117 @@
+name: GenLayer Three Contracts Live Consensus Qualification
+on:
+  push:
+    branches: [workbench/genlayer-four-native-20261018]
+    paths: ['.github/workflows/genlayer-native-live-e2e-three.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: {app: [invoicebasis, parcelcourt, shiftfair]}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Use stable Studionet and matching SDK
+        run: |
+          npm install --global genlayer
+          npm install --no-save --ignore-scripts genlayer-js@1.1.8
+          genlayer network set studionet
+      - name: Generate independent, ephemeral, secret-free principals
+        run: |
+          set -euo pipefail
+          PASSWORD="$(openssl rand -hex 32)"
+          echo "::add-mask::$PASSWORD"
+          echo "SECRET=$PASSWORD" >> "$GITHUB_ENV"
+          genlayer account create --name live-creator --password "$PASSWORD" >/dev/null
+          genlayer account create --name live-recipient --password "$PASSWORD" >/dev/null
+          genlayer account use live-recipient >/dev/null
+          OUT="$(genlayer account)"
+          REC="$(printf '%s' "$OUT" | sed -nE "s/.*address: '(0x[0-9a-fA-F]{40})'.*/\1/p" | head -n 1)"
+          test -n "$REC"
+          echo "RECIPIENT_ADDRESS=$REC" >> "$GITHUB_ENV"
+          genlayer account use live-creator >/dev/null
+      - name: Signed lifecycle with independently verified on-chain state
+        env:
+          APP: ${{ matrix.app }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p proof
+          case "$APP" in
+            invoicebasis) ADDRESS="0x0f0feAeE0AeAa4c98551622B074436565505A821"; EXPECTED="ELIGIBLE"; RULE="Revenue-share agreement: 2026 software license fees evidenced by a valid license invoice are eligible. Exclude taxes, shipping and refunds. The share rate is exactly one-third and must be calculated from integer minor units."; EVIDENCE="Signed software license invoice INV-2026-001, gross amount 999 minor units, category software license fee, corresponding delivered software subscription and paid receipt, no tax, shipping, refund or excluded service."; EXTRA=(999 1 3);;
+            parcelcourt) ADDRESS="0x14eBe8440453214CC5a923D5498402d5183A5Bcc"; EXPECTED="SUPPORTED_DELIVERY"; RULE="Goods must be delivered to the authorized reception desk; acceptance requires receiving agent signature and matching parcel reference. Carrier arrival alone is not sufficient."; EVIDENCE="Parcel PC-2026-001 handoff: authorized reception agent Maria signed the parcel receipt at the agreed reception desk; receipt states parcel reference PC-2026-001 and confirms physical delivery. Carrier scan and signed acceptance match."; EXTRA=();;
+            shiftfair) ADDRESS="0xEEbed1EB184a4BE845286B5EF0003bCbFDB10C0C"; EXPECTED="APPROVED"; RULE="Shift adjustment is permitted only when a supervisor's written authorization identifies the worker and shift, attendance logs match the claimed time, and the deterministic overtime cap of 90 minutes is enforced."; EVIDENCE="Supervisor wrote: Worker B is authorized for 120 additional minutes on roster R1 after Shift A. Timestamped attendance record shows Worker B worked 120 extra minutes on that precise shift. The frozen cap is 90 approved minutes and no funds are transferred."; EXTRA=(120 90);;
+            *) exit 2;;
+          esac
+          export ADDRESS EXPECTED
+          export CASE_ID="GN-${APP}-${GITHUB_RUN_ID}"
+          DEADLINE="$(($(date -u +%s) + 86400))"
+          run_write(){
+            local operation="$1";shift
+            printf '%s\n' "$SECRET" | genlayer write "$ADDRESS" "$operation" --args "$@" >"proof/$operation.log" 2>&1 || { echo "Command failed for $operation"; exit 1; }
+            OP="$operation" node <<'NODE'
+          import fs from 'node:fs';
+          const op=process.env.OP,s=fs.readFileSync('proof/'+op+'.log','utf8').replace(/\x1b\[[0-9;]*[A-Za-z]/g,'');
+          const tx=s.match(/Write Transaction Hash:\s*\n?\s*(0x[0-9a-fA-F]{64})/)?.[1];
+          fs.appendFileSync('proof/transactions.jsonl',JSON.stringify({operation:op,txHash:tx||null})+'\n');
+          console.log('TX_RECORDED',JSON.stringify({operation:op,txHash:tx||null}));
+          if(!tx)process.exit(1);
+          NODE
+          }
+          check(){
+            WANT="$1" node --input-type=module <<'NODE'
+          import {createClient} from 'genlayer-js';
+          import {studionet} from 'genlayer-js/chains';
+          const cli=createClient({chain:studionet});
+          const raw=await cli.readContract({address:process.env.ADDRESS,functionName:'get_case',args:[process.env.CASE_ID]});
+          const record=JSON.parse(raw),want=process.env.WANT;
+          const pass=want==='CONSENTED'?record.consented===true:record.status===want;
+          if(!pass){console.log('STATE_MISMATCH',JSON.stringify({want,state:record.status,consented:record.consented}));process.exit(1);}
+          console.log('CANONICAL_STATE',JSON.stringify({caseId:record.id,state:record.status,consented:record.consented,round:record.round,outcome:record.result}));
+          NODE
+          }
+          if [ "$APP" = invoicebasis ] || [ "$APP" = shiftfair ]; then
+            run_write create_case "$CASE_ID" "$RECIPIENT_ADDRESS" "$RULE" "$DEADLINE" "${EXTRA[@]}"
+          else
+            run_write create_case "$CASE_ID" "$RECIPIENT_ADDRESS" "$RULE" "$DEADLINE"
+          fi
+          check DRAFT
+          genlayer account use live-recipient >/dev/null
+          run_write consent "$CASE_ID"
+          check CONSENTED
+          genlayer account use live-creator >/dev/null
+          run_write freeze "$CASE_ID"
+          check FROZEN
+          run_write submit_evidence "$CASE_ID" "$EVIDENCE"
+          check EVIDENCE_LOCKED
+          run_write adjudicate "$CASE_ID"
+          check ASSESSED
+          node --input-type=module <<'NODE'
+          import {createClient} from 'genlayer-js';
+          import {studionet} from 'genlayer-js/chains';
+          const c=createClient({chain:studionet});
+          const state=JSON.parse(await c.readContract({address:process.env.ADDRESS,functionName:'get_case',args:[process.env.CASE_ID]}));
+          const history=JSON.parse(await c.readContract({address:process.env.ADDRESS,functionName:'get_history',args:[process.env.CASE_ID]}));
+          if(history.length!==1||!history[0].vector||!history[0].entry_hash)throw new Error('No durable semantic consensus assessment');
+          const verdict=state.result;
+          const proof={app:process.env.APP,chainId:61999,contract:process.env.ADDRESS,caseId:process.env.CASE_ID,verdict,expected:process.env.EXPECTED,vector:history[0].vector,round:state.round,entryHash:history[0].entry_hash,payableMinor:state.payable_minor,approvedMinutes:state.approved_minutes};
+          console.log('LIVE_CONSENSUS_PROOF',JSON.stringify(proof));
+          if(verdict!==process.env.EXPECTED)throw new Error('Unexpected semantic verdict: '+verdict);
+          if(process.env.APP==='invoicebasis'&&state.payable_minor!==333)throw new Error('Incorrect deterministic share');
+          if(process.env.APP==='shiftfair'&&state.approved_minutes!==90)throw new Error('Incorrect deterministic minute cap');
+          NODE
+      - name: Preserve nonsecret write IDs and evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-qualification-${{ matrix.app }}
+          path: proof/transactions.jsonl
+          retention-days: 30
+          if-no-files-found: warn
