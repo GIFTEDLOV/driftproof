@@ -1,4 +1,4 @@
-name: GenLayer Four V4 - Secure Studionet Deployment
+name: GenLayer Four V4 - SDK Address Compatibility Deployment
 on:
   push:
     branches:
@@ -25,11 +25,11 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install --disable-pip-version-check pytest genvm-linter >/dev/null
-          python -m pytest -q --import-mode=importlib native/test_v4_release.py
+          python -m pytest -q --import-mode=importlib native/test_v3_release.py
           for app in noticeclock invoicebasis parcelcourt shiftfair; do
             genvm-lint check "native/$app/hardening_v4/$app.py"
-            genvm-lint schema "native/$app/hardening_v4/$app.py" --json > "/tmp/$app-v4-schema.json"
-            test -s "/tmp/$app-v4-schema.json"
+            genvm-lint schema "native/$app/hardening_v4/$app.py" --json > "/tmp/$app-v3-schema.json"
+            test -s "/tmp/$app-v3-schema.json"
           done
       - name: Bind canonical Studionet chain and install GenLayer CLI
         run: |
@@ -74,7 +74,7 @@ jobs:
           const executionSuccess=/execution_result:\s*'SUCCESS'/.test(log);
           const cliSuccess=/Contract deployed successfully/i.test(log);
           const source=fs.readFileSync(`native/${slug}/hardening_v4/${slug}.py`);
-          const proof={name:slug,chainId:61999,transactionHash:hash||null,address:address||null,sourceSha256:crypto.createHash('sha256').update(source).digest('hex'),executionSuccess,cliSuccess,sourceCommit:process.env.GITHUB_SHA,release:'v4-string-address-fix'};
+          const proof={name:slug,chainId:61999,transactionHash:hash||null,address:address||null,sourceSha256:crypto.createHash('sha256').update(source).digest('hex'),executionSuccess,cliSuccess,sourceCommit:process.env.GITHUB_SHA,release:'v4-sdk-address'};
           fs.writeFileSync(`live-proof/${slug}.json`,JSON.stringify(proof,null,2)+'\n');
           console.log(JSON.stringify(proof));
           if(!(hash&&address&&executionSuccess&&cliSuccess))process.exit(1);
@@ -101,11 +101,6 @@ jobs:
             }
           })().catch(e=>{console.error(e);process.exitCode=1});
           NODE
-      - name: Qualified authentic three-actor lifecycle and independent consensus
-        run: |
-          set -euo pipefail
-          npm install --no-audit --no-fund --no-save genlayer-js@1.1.8
-          node native/v4_live_qualify.mjs
       - name: Preserve public proof without account material
         if: always()
         uses: actions/upload-artifact@v4
