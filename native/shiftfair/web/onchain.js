@@ -1,4 +1,5 @@
-import { createClient, isSuccessful } from "genlayer-js";
+import { createClient } from "genlayer-js";
+import { TransactionStatus } from "genlayer-js/types";
 import { studionet } from "genlayer-js/chains";
 
 const ADDRESS = window.CONTRACT_ADDRESS;
@@ -16,7 +17,7 @@ const numeric = x => {
   return v;
 };
 const format = obj => JSON.stringify(obj, (k, v) => typeof v === "bigint" ? v.toString() : v, 2);
-const receiptSuccessful = receipt => isSuccessful(receipt);
+const receiptSuccessful = receipt => receipt?.statusName === "FINALIZED" && receipt?.txExecutionResultName === "FINISHED_WITH_RETURN";
 
 function output(text, state = "") {
   const el = element("chain-output");
@@ -140,10 +141,11 @@ export const chainUI = {
         } else if(action==="submit_evidence"||action==="challenge"){args.push(text);}
         output("Preparing GenLayer "+action+" transaction and estimating fees...");
         const request={address:ADDRESS,functionName:action,args};
-        const estimate=await signer.estimateTransactionFeesForWrite(request);
-        const transaction=await signer.writeContract({...request,fees:{distribution:estimate.distribution,feeValue:estimate.feeValue}});
+        const estimate = typeof signer.estimateTransactionFeesForWrite === "function" ? await signer.estimateTransactionFeesForWrite(request) : null;
+        const options = estimate ? {...request, fees:{distribution:estimate.distribution,feeValue:estimate.feeValue}} : request;
+        const transaction=await signer.writeContract(options);
         output({status:"SUBMITTED_NOT_FINAL",transactionHash:transaction,action});
-        const receipt=await signer.waitForFinalization({hash:transaction});
+        const receipt=await signer.waitForTransactionReceipt({hash:transaction,status:TransactionStatus.FINALIZED});
         if(!receiptSuccessful(receipt))throw new Error("Transaction finalized with execution error: "+format(receipt).slice(0,380));
         output({status:"FINALIZED_EXECUTION_SUCCESS",transactionHash:transaction,receipt},"success");
       }catch(e){output("Action not completed: "+toMessage(e),"error");}
