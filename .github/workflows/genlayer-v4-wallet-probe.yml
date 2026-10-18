@@ -27,3 +27,5 @@ jobs:
           path: wallet-probe/*
           retention-days: 30
           if-no-files-found: warn
+
+# Trace basic MetaMask Snap discovery in isolated provider.
