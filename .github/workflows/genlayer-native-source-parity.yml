@@ -16,8 +16,8 @@ jobs:
         with: {node-version: '24'}
       - name: Probe read-only GenLayer RPC source retrieval variants
         run: |
-          node <<'NODE'
-          const fs=require('fs'),crypto=require('crypto');
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';import crypto from 'node:crypto';
           const pairs=[
             ['noticeclock','0xDC02E6856e8DF12b0FaCB5e62a034Cb65a60eB1c'],
             ['invoicebasis','0x0f0feAeE0AeAa4c98551622B074436565505A821'],
