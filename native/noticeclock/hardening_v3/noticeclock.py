@@ -141,7 +141,7 @@ class NoticeClock(gl.Contract):
                 attestor_hex in (_sender(), recipient_hex) or
                 attestor_hex == '0x'+'0'*40):
             _fail('BAD_ATTESTOR')
-        record = {'id':case_id, 'creator':_sender(), 'recipient':recipient_hex, 'rule':frozen_clause, 'deadline':deadline, 'status':'DRAFT', 'consented':False, 'evidence':'', 'evidence_hash':'', 'round':0, 'result':'', 'created':_now(), 'last_at':0, 'attestor':attestor_hex, 'attested':False, 'attestation_hash':'', 'source_ref':'', 'challenge_text':'', 'challenge_hash':'', 'finalized_at':0}
+        record = {'id':case_id, 'creator':_sender(), 'recipient':recipient_hex, 'rule':frozen_clause, 'deadline':deadline, 'status':'DRAFT', 'consented':False, 'evidence':'', 'evidence_hash':'', 'round':0, 'result':'', 'created':_now(), 'last_at':0, 'attestor':attestor_hex, 'attested':False, 'attestation_hash':'', 'source_ref':'', 'challenge_text':'', 'challenge_hash':'', 'challenges':[], 'finalized_at':0}
         record['cure_deadline'] = deadline
 
         self._store(record)
@@ -236,8 +236,23 @@ class NoticeClock(gl.Contract):
                        'source_ref_hash':_digest(record['source_ref'])}
         if record['attestation_hash'] != _digest(_canon(attestation)):
             _fail('ATTESTATION_INTEGRITY')
-        if record['status'] == 'CHALLENGED' and _digest(record['challenge_text']) != record['challenge_hash']:
-            _fail('CHALLENGE_INTEGRITY')
+        if record['status'] == 'CHALLENGED':
+            disputes = record['challenges']
+            if (type(disputes) is not list or not 1 <= len(disputes) <= 2 or
+                    any(type(item) is not dict or set(item) != {'actor','text','hash'} for item in disputes)):
+                _fail('CHALLENGE_INTEGRITY')
+            if (len({item['actor'] for item in disputes}) != len(disputes) or
+                    any(item['actor'] not in (record['creator'],record['recipient']) or
+                        _digest(item['text']) != item['hash'] for item in disputes)):
+                _fail('CHALLENGE_INTEGRITY')
+            expected_text = '\n'.join(item['actor'] + ': ' + item['text'] for item in disputes)
+            if (record['challenge_hash'] != _digest(_canon(disputes)) or
+                    expected_text != record['challenge_text']):
+                _fail('CHALLENGE_INTEGRITY')
+            # First challenger cannot steal the other party's review slot.
+            # A second consensus round can happen early only if BOTH parties respond.
+            if len(disputes) < 2 and _now() <= record['last_at'] + 86400:
+                _fail('CHALLENGE_RESPONSE_WINDOW_OPEN')
         if _now() < record['last_at'] + 10:
             _fail('COOLDOWN')
         binding = _canon({'schema':SCHEMA, 'case':case_id,
@@ -265,17 +280,19 @@ class NoticeClock(gl.Contract):
     @gl.public.write
     def challenge(self, case_id: str, justification: str) -> None:
         record = self._read(case_id)
-        if record['status'] != 'ASSESSED' or _sender() not in (record['creator'],record['recipient']):
+        if (record['status'] not in ('ASSESSED','CHALLENGED') or record['round'] != 1 or
+                _sender() not in (record['creator'],record['recipient'])):
             _fail('CHALLENGE_DENIED')
         if _now() > record['last_at'] + 86400:
             _fail('CHALLENGE_WINDOW_CLOSED')
-        if record['round'] >= 2:
-            _fail('CHALLENGE_LIMIT')
         _check_string(justification, 512)
+        existing = record['challenges']
+        if len(existing) >= 2 or any(item['actor'] == _sender() for item in existing):
+            _fail('CHALLENGE_DUPLICATE')
+        existing.append({'actor':_sender(), 'text':justification, 'hash':_digest(justification)})
+        record['challenge_text'] = '\n'.join(item['actor'] + ': ' + item['text'] for item in existing)
+        record['challenge_hash'] = _digest(_canon(existing))
         record['status'] = 'CHALLENGED'
-        # Challenger cannot rely on the prior round's preliminary amount.
-        record['challenge_text'] = justification
-        record['challenge_hash'] = _digest(justification)
         self._store(record)
 
     @gl.public.write

@@ -113,16 +113,18 @@ def test_challenge_affects_second_round_and_hash_binding(env):
     challenge='The signed manifest does not match the handoff timestamp or scope.'
     env.obj.challenge(env.case,challenge)
     record=env.rec()
-    assert record['challenge_text']==challenge and record['challenge_hash']==env.c._digest(challenge)
+    assert challenge in record['challenge_text'] and len(record['challenges'])==1
+    assert record['challenge_hash']==env.c._digest(env.c._canon(record['challenges']))
+    env.actor(env.f.A);env.obj.challenge(env.case,'The signed issuer confirms scope and date.')
     env.f.CLOCK[0]+=11
     env.f.PROMPTS.clear()
     try:
         env.actor(env.f.A)
         env.obj.adjudicate(env.case)
-        assert all(challenge in p and record['challenge_hash'] in p for p in env.f.PROMPTS)
+        assert all(challenge in p and env.rec()['challenge_hash'] in p for p in env.f.PROMPTS)
         history=json.loads(env.obj.get_history(env.case))
         assert len(history)==2 and history[1]['prev']==history[0]['entry_hash']
-        with pytest.raises(env.f.UserError,match='CHALLENGE_LIMIT'):
+        with pytest.raises(env.f.UserError,match='CHALLENGE_DENIED'):
             env.obj.challenge(env.case,'illegitimate third vote')
     finally:env.f.CLOCK[0]-=11
 
@@ -131,6 +133,7 @@ def test_challenge_tamper_rejected_before_consensus(env):
     env.prepare(attested=True)
     env.obj.adjudicate(env.case)
     env.obj.challenge(env.case,'Review missing delivery acknowledgement')
+    env.actor(env.f.B);env.obj.challenge(env.case,'Independent rebuttal')
     record=env.rec();record['challenge_text']='Changed after freeze';env.obj._store(record)
     env.f.CLOCK[0]+=11
     try:
@@ -171,9 +174,28 @@ def test_finalization_immutable_amounts_and_any_actor(env):
 def test_challenge_round2_can_finalize_without_waiting_extra_day(env):
     env.prepare(attested=True);env.obj.adjudicate(env.case)
     env.actor(env.f.B);env.obj.challenge(env.case,'Second review of signed manifest')
+    env.actor(env.f.A);env.obj.challenge(env.case,'Our response to that review')
     env.f.CLOCK[0]+=11
     try:
         env.actor(env.f.A);env.obj.adjudicate(env.case)
         env.actor(env.f.C);assert env.obj.finalize_case(env.case)==env.f.positive
         assert env.rec()['status']=='FINALIZED'
+    finally:env.f.CLOCK[0]-=11
+
+
+def test_first_challenger_cannot_monopolize_second_challenge(env):
+    env.prepare(attested=True);env.obj.adjudicate(env.case)
+    env.actor(env.f.A);env.obj.challenge(env.case,'Original assessment lacks issuer details')
+    with pytest.raises(env.f.UserError,match='CHALLENGE_DUPLICATE'):
+        env.obj.challenge(env.case,'Clog the single challenge slot')
+    env.f.CLOCK[0]+=11
+    try:
+        with pytest.raises(env.f.UserError,match='CHALLENGE_RESPONSE_WINDOW_OPEN'):
+            env.obj.adjudicate(env.case)
+        env.actor(env.f.B)
+        env.obj.challenge(env.case,'Counterparty response to issuer analysis')
+        assert len(env.rec()['challenges'])==2
+        env.actor(env.f.A)
+        env.obj.adjudicate(env.case)
+        assert env.rec()['round']==2
     finally:env.f.CLOCK[0]-=11
