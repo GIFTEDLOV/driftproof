@@ -1,0 +1,11 @@
+{
+  "name": "parcelcourt",
+  "category": "GenLayer application",
+  "source": "contracts/parcelcourt.py",
+  "source_sha256": "6a55f3aca1d8c0c644f25bde9a3727b82cdcaae451bd87e1335974971cf2e2a2",
+  "network_target": "Studionet 61999",
+  "deployed": false,
+  "verified_genvm": false,
+  "verified_consensus": false,
+  "release_status": "NO_GO"
+}
