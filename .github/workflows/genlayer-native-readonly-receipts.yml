@@ -36,7 +36,8 @@ jobs:
       - name: Canonical SDK readback and transaction receipt
         run: |
           node --input-type=module <<'NODE'
-          import {createClient,isSuccessful} from 'genlayer-js';
+          import {createClient} from 'genlayer-js';
+          import {TransactionStatus} from 'genlayer-js/types';
           import {studionet} from 'genlayer-js/chains';
           const cli=createClient({chain:studionet});
           const addr='0xDC02E6856e8DF12b0FaCB5e62a034Cb65a60eB1c';
@@ -48,8 +49,8 @@ jobs:
           }
           if(process.env.CREATE_TX) {
             try {
-              const receipt=await cli.waitForFinalization({hash:process.env.CREATE_TX});
-              console.log('TX_LIFECYCLE',JSON.stringify({hash:process.env.CREATE_TX,statusName:receipt.statusName,txExecutionResultName:receipt.txExecutionResultName,isSuccessful:isSuccessful(receipt)},null,2));
+              const receipt=await cli.waitForTransactionReceipt({hash:process.env.CREATE_TX,status:TransactionStatus.FINALIZED});
+              console.log('TX_LIFECYCLE',JSON.stringify({hash:process.env.CREATE_TX,statusName:receipt.statusName,txExecutionResultName:receipt.txExecutionResultName,isSuccessful:(receipt.statusName==='FINALIZED'&&receipt.txExecutionResultName==='FINISHED_WITH_RETURN')},null,2));
             }catch(e){console.log('RECEIPT_ERROR',String(e?.shortMessage||e?.message||e).slice(0,500))}
           }
           NODE
