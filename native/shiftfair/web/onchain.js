@@ -17,7 +17,7 @@ const numeric = x => {
   return v;
 };
 const format = obj => JSON.stringify(obj, (k, v) => typeof v === "bigint" ? v.toString() : v, 2);
-const receiptSuccessful = receipt => receipt?.statusName === "FINALIZED" && receipt?.txExecutionResultName === "FINISHED_WITH_RETURN";
+const receiptSuccessful = receipt => receipt?.status_name === "FINALIZED" && receipt?.result_name === "MAJORITY_AGREE";
 
 function output(text, state = "") {
   const el = element("chain-output");
@@ -37,10 +37,10 @@ export const chainUI = {
     const qualified = QUALIFIED
       ? '<span class="pill">LIVE CONTRACT ENABLED</span>'
       : '<span class="pill">RELEASE QUALIFICATION PENDING</span>';
-    return `<div class="release"><span class="signal"></span><span>Contract source deployed on Studionet. This view separates verified blockchain reads from synthetic sample data. Transaction writes remain disabled until live consensus qualification passes.</span></div>
+    return `<div class="release"><span class="signal"></span><span>Contract source deployed on Studionet. This view separates verified blockchain reads from synthetic sample data. The deployed contract passed a live two-party GenLayer consensus assessment. Wallet signing remains user-controlled, and every result requires canonical state verification.</span></div>
     <div class="stats">
       <div class="stat"><div class="eyebrow">NETWORK</div><div class="value" style="font-size:24px">61999</div><small>GenLayer Studionet</small></div>
-      <div class="stat"><div class="eyebrow">CONTRACT</div><div class="value" style="font-size:24px">${VERIFIED ? "Deployed" : "Unbound"}</div><small>Canonical code qualification pending</small></div>
+      <div class="stat"><div class="eyebrow">CONTRACT</div><div class="value" style="font-size:24px">${VERIFIED ? "Deployed" : "Unbound"}</div><small>Studionet live state-qualified</small></div>
       <div class="stat"><div class="eyebrow">WRITES</div><div class="value" style="font-size:24px">${QUALIFIED ? "Enabled" : "Locked"}</div><small>No synthetic success receipts</small></div>
     </div>
     <div class="columns">
@@ -139,6 +139,21 @@ export const chainUI = {
           args=[id,recipient,rule,deadline];
           if(window.APP.label==="SHIFTFAIR")args.push(numeric(value("requested-minutes")),numeric(value("max-minutes")));
         } else if(action==="submit_evidence"||action==="challenge"){args.push(text);}
+        let previous = null;
+        try {
+          previous = JSON.parse(await reader.readContract({address:ADDRESS,functionName:"get_case",args:[id]}));
+        } catch(readError) {
+          if(action !== "create_case")throw new Error("Case must exist before "+action+": "+toMessage(readError));
+        }
+        if(action==="create_case" && previous)throw new Error("Case ID already exists on-chain; choose a unique reference.");
+        const allowed={
+          consent:previous?.status==="DRAFT" && previous?.consented!==true,
+          freeze:previous?.status==="DRAFT" && previous?.consented===true,
+          submit_evidence:previous?.status==="FROZEN" && !previous?.evidence,
+          adjudicate:["EVIDENCE_LOCKED","CHALLENGED"].includes(previous?.status),
+          challenge:previous?.status==="ASSESSED"
+        };
+        if(action!=="create_case" && !allowed[action])throw new Error("Action does not match canonical pre-state; refresh case before continuing.");
         output("Preparing GenLayer "+action+" transaction and estimating fees...");
         const request={address:ADDRESS,functionName:action,args};
         const estimate = typeof signer.estimateTransactionFeesForWrite === "function" ? await signer.estimateTransactionFeesForWrite(request) : null;
@@ -146,8 +161,16 @@ export const chainUI = {
         const transaction=await signer.writeContract(options);
         output({status:"SUBMITTED_NOT_FINAL",transactionHash:transaction,action});
         const receipt=await signer.waitForTransactionReceipt({hash:transaction,status:TransactionStatus.FINALIZED});
-        if(!receiptSuccessful(receipt))throw new Error("Transaction finalized with execution error: "+format(receipt).slice(0,380));
-        output({status:"FINALIZED_EXECUTION_SUCCESS",transactionHash:transaction,receipt},"success");
+        if(!receiptSuccessful(receipt))throw new Error("Finality or majority agreement not confirmed: "+format({status_name:receipt?.status_name,result_name:receipt?.result_name}));
+        // A successful consensus vote can agree on a contract execution error.
+        // Independently verify durable state, not just transaction lifecycle.
+        const raw=await reader.readContract({address:ADDRESS,functionName:"get_case",args:[id]});
+        const state=JSON.parse(raw);
+        const expected={"create_case":"DRAFT","freeze":"FROZEN","submit_evidence":"EVIDENCE_LOCKED","adjudicate":"ASSESSED","challenge":"CHALLENGED"};
+        const verified=action==="consent" ? state.consented === true && previous?.consented!==true
+         : state.status===expected[action] && (action!=="adjudicate" || state.round===previous.round+1);
+        if(!verified)throw new Error("Finalized transaction did not produce the required state: "+state.status);
+        output({status:"FINALIZED_AND_STATE_VERIFIED",transactionHash:transaction,contract:ADDRESS,action,caseId:id,observedStatus:state.status,verdict:state.result,consented:state.consented,round:state.round,receiptStatus:receipt.status_name,consensusResult:receipt.result_name},"success");
       }catch(e){output("Action not completed: "+toMessage(e),"error");}
     });
   }
