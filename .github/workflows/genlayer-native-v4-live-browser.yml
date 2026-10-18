@@ -1,0 +1,29 @@
+name: GenLayer V4 - Real Browser Canonical Smoke
+on:
+  push:
+    branches: [workbench/genlayer-four-native-20261018]
+    paths: ['native/v4_browser_live.mjs', '.github/workflows/genlayer-native-v4-live-browser.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Install Playwright and Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install --with-deps chromium
+      - name: Verify live case data, truthful UI, locked signing, and browser errors
+        run: node native/v4_browser_live.mjs
+      - name: Preserve real browser QA results and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genlayer-four-v4-browser-evidence
+          path: browser-proof/*
+          retention-days: 30
+          if-no-files-found: warn
