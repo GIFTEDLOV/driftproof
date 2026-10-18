@@ -1,0 +1,57 @@
+name: GenLayer Four V4 - Existing Deployments Live Qualification
+on:
+  push:
+    branches: [workbench/genlayer-four-native-20261018]
+    paths: ['.github/workflows/genlayer-native-v4-existing-e2e.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: genlayer-v4-existing-e2e-${{ github.sha }}
+  cancel-in-progress: false
+jobs:
+  qualify-already-deployed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Verify onchain bytecode parity before any signed transactions
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p live-proof
+          node <<'NODE'
+          const fs=require('fs'),crypto=require('crypto');
+          const addresses={noticeclock:'0x99D41333f28913BA45Fc36C64eb0A88D1600F350',invoicebasis:'0x3C066b25aa1BaF2374F9b1540f99594C737caf8a',parcelcourt:'0xC0B3De8897015a9aAfDc06EB4d09FD2F4d62BA72',shiftfair:'0xdB7419b175bb5Ff63343f8a9Ac7f42f11feA03Fd'};
+          (async()=>{for(const [app,address] of Object.entries(addresses)){
+            const source=fs.readFileSync(`native/${app}/hardening_v4/${app}.py`);
+            const sourceSha256=crypto.createHash('sha256').update(source).digest('hex');
+            const response=await fetch('https://studio.genlayer.com/api',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',method:'gen_getContractCode',params:[address],id:1})});
+            const data=await response.json();if(!response.ok||data.error||typeof data.result!=='string')throw Error('RPC source retrieval: '+JSON.stringify(data.error||response.status));
+            const actual=crypto.createHash('sha256').update(Buffer.from(data.result,'base64')).digest('hex');
+            if(sourceSha256!==actual)throw Error(`${app}: SOURCE_PARITY_MISMATCH ${sourceSha256} ${actual}`);
+            fs.writeFileSync(`live-proof/${app}.json`,JSON.stringify({app,chainId:61999,address,sourceSha256,installedSourceSha256:actual,sourceByteParity:'PASS',originalDeployRun:39138161003,originalDeployCommit:'5e1d96fec2484b5fea5d1c8cfb3777ba9f51a352'},null,2)+'\n');
+            console.log(app,'SOURCE_PARITY_PASS',sourceSha256);
+          }})().catch(e=>{console.error(e);process.exitCode=1});
+          NODE
+      - name: Pin GenLayerJS and check live qualification script syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-audit --no-fund genlayer-js@1.1.8
+          node --check native/v4_live_qualify.mjs
+      - name: Real signed three-actor state transitions and independent consensus
+        shell: bash
+        run: |
+          set -euo pipefail
+          node native/v4_live_qualify.mjs
+      - name: Preserve public receipts, even if live qualification fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genlayer-v4-existing-deployment-live-evidence
+          path: live-proof/*.json
+          if-no-files-found: warn
+          retention-days: 30

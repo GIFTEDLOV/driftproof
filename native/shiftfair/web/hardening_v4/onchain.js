@@ -31,7 +31,8 @@ async function afterTx(saved){
   const leaders=persisted?.consensus_data?.leader_receipt||[];
   const phase=persisted?.status_name??persisted?.statusName;
   // GenVM execution and canonical state matter, not majority agreement alone.
-  if(phase!=="FINALIZED"||!leaders.length||leaders.some(x=>x.execution_result!=="SUCCESS")){
+  const material=leaders.filter(x=>!(x.execution_result==="ERROR"&&/validator execution cancelled after quorum/i.test(String(x?.genvm_result?.stderr||""))));
+  if(phase!=="FINALIZED"||!material.some(x=>x.execution_result==="SUCCESS")||material.some(x=>x.execution_result!=="SUCCESS")){
     throw Error("On-chain execution not proven successful: "+format({hash:saved.hash,phase,executions:leaders.map(x=>({result:x.execution_result,error:String(x.genvm_result?.stderr||"").slice(-260)}))}));
   }
   const state=canonical(await read("get_case",[saved.caseId]));

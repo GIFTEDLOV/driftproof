@@ -35,7 +35,8 @@ async function qualify(slug){
    last.phase=status.status_name??status.statusName;
    last.execution=leaders;last.consensus=status.result_name;
    save();
-   if(last.phase!=='FINALIZED'||leaders.length===0||leaders.some(x=>x.result!=='SUCCESS'))throw Error("Live "+method+" execution failed: "+JSON.stringify(leaders).slice(0,850));
+   const material=leaders.filter(x=>!(x.result==='ERROR'&&/validator execution cancelled after quorum/i.test(x.stderr)));
+   if(last.phase!=='FINALIZED'||!material.some(x=>x.result==='SUCCESS')||material.some(x=>x.result!=='SUCCESS'))throw Error("Live "+method+" execution failed: "+JSON.stringify(leaders).slice(0,850));
    const state=await curr();
    if(!expected(state))throw Error(`Live ${method} canonical state mismatch ${JSON.stringify(state).slice(0,500)}`);
    last.verifiedCaseState=state.status;save();
