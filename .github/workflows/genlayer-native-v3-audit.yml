@@ -1,0 +1,47 @@
+name: GenLayer Four V3 - Independent Release Gates
+on:
+  push:
+    branches:
+      - workbench/genlayer-four-native-20261018
+    paths:
+      - 'native/**/hardening_v3/**'
+      - 'native/*/tests/**'
+      - 'native/test_v3*'
+      - '.github/workflows/genlayer-native-v3-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  candidate-lint-and-adversarial-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install GenVM linter and pytest
+        run: python -m pip install --disable-pip-version-check genvm-linter pytest
+      - name: Mocked cross-project v3 adversarial tests
+        run: python -m pytest -q --import-mode=importlib native/test_v3_release.py
+      - name: V3 independent-model, typed-schema and GenVM quality
+        run: |
+          set -euo pipefail
+          for app in noticeclock invoicebasis parcelcourt shiftfair; do
+            file="native/$app/hardening_v3/$app.py"
+            echo "Checking $file"
+            python -m py_compile "$file"
+            genvm-lint check "$file"
+            genvm-lint schema "$file" --json > "/tmp/$app-v3-schema.json"
+            test -s "/tmp/$app-v3-schema.json"
+          done
+      - name: Browser transaction-state mock harness and code validation
+        run: |
+          set -euo pipefail
+          for app in parcelcourt shiftfair; do
+            node --check "native/$app/web/hardening_v3/onchain.js"
+          done
+          node --test native/test_v3_frontend.mjs
