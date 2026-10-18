@@ -1,0 +1,3 @@
+/** Static V4 browser SDK compatibility guards. */
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
+for(const app of ['parcelcourt','shiftfair']){const s=fs.readFileSync(`native/${app}/web/hardening_v4/onchain.js`,'utf8');test(`${app}: receipt verifies actual GenVM success`,()=>{assert.match(s,/leader_receipt/);assert.match(s,/execution_result!=="SUCCESS"/);assert.match(s,/canonical/);assert.doesNotMatch(s,/waitForFinalization|isSuccessful\(/);});test(`${app}: no browser writes without qualified release`,()=>{assert.match(s,/RELEASE_QUALIFIED === true/);assert.match(s,/!QUALIFIED\|\|!BOUND/);});}
