@@ -199,3 +199,16 @@ def test_first_challenger_cannot_monopolize_second_challenge(env):
         env.obj.adjudicate(env.case)
         assert env.rec()['round']==2
     finally:env.f.CLOCK[0]-=11
+
+
+def test_global_128_case_capacity_griefing_removed_and_pages_bounded(env):
+    env.actor(env.f.A)
+    assert env.obj.case_exists(env.case) is False
+    for i in range(130):
+        args=list(env.args);args[0]=f'case-{i}'
+        env.obj.create_case(*args)
+    assert env.obj.case_exists('case-129') is True
+    assert len(env.obj.get_case_ids_page(0,100)) == 100
+    assert len(env.obj.get_case_ids_page(100,100)) == 30
+    with pytest.raises(env.f.UserError,match='INVALID_PAGE'):
+        env.obj.get_case_ids_page(0,101)

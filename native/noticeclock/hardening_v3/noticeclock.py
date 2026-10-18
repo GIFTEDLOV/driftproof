@@ -17,7 +17,7 @@ KEYS = ('breach_identified', 'clause_applicable', 'requested_cure_clear', 'evide
 MAX_TEXT = 4096
 MAX_RULE = 2048
 MAX_ID = 96
-MAX_ITEMS = 128
+MAX_PAGE_SIZE = 100
 
 
 def _now() -> int:
@@ -125,8 +125,6 @@ class NoticeClock(gl.Contract):
         _check_string(frozen_clause, MAX_RULE)
         if self.cases.get(case_id, ''):
             _fail('DUPLICATE_CASE')
-        if len(self.case_ids) >= MAX_ITEMS:
-            _fail('MAX_CASES')
         if type(deadline) is not int or deadline <= _now() or deadline > _now()+31536000:
             _fail('BAD_DEADLINE')
         recipient_hex = recipient.as_hex.lower()
@@ -317,6 +315,19 @@ class NoticeClock(gl.Contract):
     def get_history(self, case_id: str) -> str:
         self._read(case_id)
         return self.histories[case_id]
+
+    @gl.public.view
+    def case_exists(self, case_id: str) -> bool:
+        _id(case_id)
+        return bool(self.cases.get(case_id, ''))
+
+    @gl.public.view
+    def get_case_ids_page(self, offset: int, limit: int) -> list[str]:
+        if (type(offset) is not int or type(limit) is not int or
+                offset < 0 or limit < 1 or limit > MAX_PAGE_SIZE):
+            _fail('INVALID_PAGE')
+        end = min(offset + limit, len(self.case_ids))
+        return [self.case_ids[i] for i in range(offset, end)]
 
     @gl.public.view
     def get_case_ids(self) -> list[str]:

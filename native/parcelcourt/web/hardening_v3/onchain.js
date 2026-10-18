@@ -96,9 +96,9 @@ export const chainUI={
         let previous=null;
         if(action==="create_case"){
           // Reject unknown-state instead of treating a timeout as evidence of no case.
-          const identifiers=await read("get_case_ids",[]);
-          if(!Array.isArray(identifiers))throw Error("Unable to verify on-chain case registry; no write submitted.");
-          if(identifiers.includes(id))throw Error("Case already exists. Provide a new ID.");
+          const exists=await read("case_exists",[id]);
+          if(typeof exists!=="boolean")throw Error("Cannot verify on-chain case existence; no write submitted.");
+          if(exists)throw Error("Case already exists. Provide a new ID.");
         }else{
           previous=canonical(await read("get_case",[id]));
         }
