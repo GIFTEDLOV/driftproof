@@ -1,0 +1,54 @@
+name: GenLayer Deployed Source Byte Parity
+on:
+  push:
+    branches: [workbench/genlayer-four-native-20261018]
+    paths: ['.github/workflows/genlayer-native-source-parity.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-source-bytes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Install published stable GenLayerJS
+        run: npm install --no-save --ignore-scripts genlayer-js@1.1.8
+      - name: Compare actual deployed code and canonical candidate bytes
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+          import {createClient} from 'genlayer-js';
+          import {studionet} from 'genlayer-js/chains';
+          const client=createClient({chain:studionet});
+          const cases=[
+            ['noticeclock','0xDC02E6856e8DF12b0FaCB5e62a034Cb65a60eB1c'],
+            ['invoicebasis','0x0f0feAeE0AeAa4c98551622B074436565505A821'],
+            ['parcelcourt','0x14eBe8440453214CC5a923D5498402d5183A5Bcc'],
+            ['shiftfair','0xEEbed1EB184a4BE845286B5EF0003bCbFDB10C0C']
+          ];
+          const sha=buf=>crypto.createHash('sha256').update(buf).digest('hex');
+          let failed=0;
+          for(const [name,address] of cases){
+            const local=fs.readFileSync('native/'+name+'/contracts/'+name+'.py');
+            try {
+              const code=await client.getContractCode({address});
+              let source=typeof code==='string'?Buffer.from(code,'utf8'):Buffer.from(code);
+              let decoded='raw';
+              if(source[0]!==35 && typeof code==='string'){
+                const b=Buffer.from(code,'base64');
+                if(b[0]===35){source=b;decoded='base64';}
+              }
+              const same=source.equals(local);
+              console.log(JSON.stringify({name,address,encoding:decoded,sourceSha256:sha(local),deployedSha256:sha(source),localBytes:local.length,deployedBytes:source.length,exactByteParity:same}));
+              if(!same)failed++;
+            }catch(e){
+              failed++;
+              console.log(JSON.stringify({name,address,error:String(e?.message||e).slice(0,300),exactByteParity:false}));
+            }
+          }
+          if(failed)process.exit(1);
+          NODE
