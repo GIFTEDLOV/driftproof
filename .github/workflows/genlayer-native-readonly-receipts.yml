@@ -50,7 +50,7 @@ jobs:
           if(process.env.CREATE_TX) {
             try {
               const receipt=await cli.waitForTransactionReceipt({hash:process.env.CREATE_TX,status:TransactionStatus.FINALIZED});
-              console.log('TX_FIELDS',JSON.stringify({keys:Object.keys(receipt),status:receipt.status,statusName:receipt.statusName,result:receipt.result,txExecutionResult:receipt.txExecutionResult,txExecutionResultName:receipt.txExecutionResultName,executionResult:receipt.executionResult,round:receipt.consensusRound},(k,v)=>typeof v==='bigint'?v.toString():v,2));
+              console.log('TX_FIELDS',JSON.stringify({keys:Object.keys(receipt),status:receipt.status,status_name:receipt.status_name,statusName:receipt.statusName,result:receipt.result,result_name:receipt.result_name,txExecutionResult:receipt.txExecutionResult,txExecutionResultName:receipt.txExecutionResultName,executionResult:receipt.executionResult,round:receipt.consensusRound},(k,v)=>typeof v==='bigint'?v.toString():v,2));
             }catch(e){console.log('RECEIPT_ERROR',String(e?.shortMessage||e?.message||e).slice(0,500))}
           }
           NODE
