@@ -1,0 +1,29 @@
+name: GenLayer Four V4 - Isolated Browser Wallet RPC Probe
+on:
+  push:
+    branches: [workbench/genlayer-four-native-20261018]
+    paths: ['.github/workflows/genlayer-v4-wallet-probe.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  browser-wallet-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Setup real Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright
+          npx playwright install --with-deps chromium
+      - name: Browser EIP-1193 request-path check without broadcasts
+        run: node native/v4_browser_wallet_probe.mjs
+      - name: Retain wallet provider request traces and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genlayer-v4-browser-wallet-rpc-evidence
+          path: wallet-probe/*
+          retention-days: 30
+          if-no-files-found: warn
