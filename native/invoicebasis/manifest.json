@@ -1,0 +1,11 @@
+{
+  "name": "invoicebasis",
+  "category": "Standalone Intelligent Contract",
+  "source": "contracts/invoicebasis.py",
+  "source_sha256": "217eebe4aa84f1c70b2477443ff5607c67edf828fa286e9ff9fb1000667404f5",
+  "network_target": "Studionet 61999",
+  "deployed": false,
+  "verified_genvm": false,
+  "verified_consensus": false,
+  "release_status": "NO_GO"
+}
