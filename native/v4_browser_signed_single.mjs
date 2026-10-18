@@ -69,6 +69,8 @@ for(const app of apps){
   await page.locator('#chain-hours').fill('24');
   if(app.name==='ShiftFair'){await page.locator('#requested-minutes').fill('120');await page.locator('#max-minutes').fill('90');}
   await page.locator('#chain-action').selectOption('create_case');
+  record.formCheck=await page.evaluate(()=>{const to=document.getElementById('chain-recipient')?.value||'',att=document.getElementById('chain-attestor')?.value||'',id=document.getElementById('chain-case-id')?.value||'';const re=/^0x[a-fA-F0-9]{40}$/;return {to,att,id,toLength:to.length,attLength:att.length,validTo:re.test(to),validAtt:re.test(att),distinct:to.toLowerCase()!==att.toLowerCase()};});save();
+  if(!record.formCheck.validTo||!record.formCheck.validAtt||!record.formCheck.distinct)throw Error('Invalid form inputs before wallet signing '+JSON.stringify(record.formCheck));
   await page.locator('#chain-execute').click();
   await page.waitForFunction(()=>{const e=document.querySelector('#chain-output');const s=e?.textContent||'';return s.includes('VERIFIED_FINALIZED_EXECUTION_AND_STATE')||s.includes('Submission ')||s.includes('Pending transaction')},null,{timeout:420000}).catch(()=>{});
   const out=await page.locator('#chain-output').innerText();record.browserOutput=out.slice(0,800);
