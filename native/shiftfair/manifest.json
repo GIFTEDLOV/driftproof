@@ -1,0 +1,11 @@
+{
+  "name": "shiftfair",
+  "category": "GenLayer application",
+  "source": "contracts/shiftfair.py",
+  "source_sha256": "10f8a287044200212bd5e6ad420b3de97d0e91f45949c12ae27571718fc929f3",
+  "network_target": "Studionet 61999",
+  "deployed": false,
+  "verified_genvm": false,
+  "verified_consensus": false,
+  "release_status": "NO_GO"
+}
