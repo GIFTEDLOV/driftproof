@@ -116,7 +116,7 @@ class ShiftFair(gl.Contract):
         self.cases[r['id']] = _canon(r)
 
     @gl.public.write
-    def create_case(self, case_id: str, recipient: str, frozen_clause: str, deadline: int, requested_minutes: int, max_minutes: int) -> str:
+    def create_case(self, case_id: str, recipient: Address, frozen_clause: str, deadline: int, requested_minutes: int, max_minutes: int) -> str:
         _id(case_id)
         _check_string(frozen_clause, MAX_RULE)
         if self.cases.get(case_id, ''):
@@ -125,15 +125,16 @@ class ShiftFair(gl.Contract):
             _fail('MAX_CASES')
         if type(deadline) is not int or deadline <= _now() or deadline > _now()+31536000:
             _fail('BAD_DEADLINE')
-        _check_string(recipient, 42)
-        if not (recipient.startswith('0x') and len(recipient)==42) or recipient.lower()==_sender():
+        recipient_hex = recipient.as_hex.lower()
+        _check_string(recipient_hex, 42)
+        if not (recipient_hex.startswith('0x') and len(recipient_hex)==42) or recipient_hex==_sender():
             _fail('BAD_EMPLOYEE')
         if type(requested_minutes) is not int or type(max_minutes) is not int:
             _fail('BAD_MINUTES')
         if not (0 < requested_minutes <= 10080 and 0 < max_minutes <= 10080):
             _fail('BAD_MINUTES')
 
-        record = {'id':case_id, 'creator':_sender(), 'recipient':recipient.lower(), 'rule':frozen_clause, 'deadline':deadline, 'status':'DRAFT', 'consented':False, 'evidence':'', 'evidence_hash':'', 'round':0, 'result':'', 'created':_now(), 'last_at':0}
+        record = {'id':case_id, 'creator':_sender(), 'recipient':recipient_hex, 'rule':frozen_clause, 'deadline':deadline, 'status':'DRAFT', 'consented':False, 'evidence':'', 'evidence_hash':'', 'round':0, 'result':'', 'created':_now(), 'last_at':0}
         record['requested_minutes'] = requested_minutes
         record['max_minutes'] = max_minutes
         record['approved_minutes'] = 0
