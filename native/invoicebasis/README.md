@@ -2,9 +2,24 @@
 
 **Category:** Standalone Intelligent Contract  
 **Version:** `0.1.0` development candidate  
-**Release gate:** NOT DEPLOYED / NOT SUBMISSION READY
+**Release gate:** Studionet deployed; positive-path independently consensus-qualified; final reviewer/security gates pending
 
 Resolve disputed revenue-share invoice eligibility while keeping fees, percentages and minor-unit arithmetic deterministic.
+
+## Verified Studionet implementation — October 18, 2026
+
+- Category: **Standalone Intelligent Contract**. Invoice item classification against frozen revenue-share eligibility rules, with strictly deterministic minor-unit arithmetic.
+- Network: GenLayer Studionet (chain 61999)
+- Address: `0x0f0feAeE0AeAa4c98551622B074436565505A821`
+- Deployment tx: `0x0b8959e66e7eac779c3747c55853c90ee51e19a728e2de046e7b0c24f7217613`
+- Corrected contract source SHA-256: `6b74512ab8ea611b6800d0efbc7d4e7a45d1c67745d9fac34e03f9f4a63c5c54`
+- Live case: `GN-invoicebasis-39111325157`; decision: **ELIGIBLE**
+- Adjudication tx: `0x56ccb02f531b22e00cdec65291fe569536ba285dc8e9f8139d0f74b32b5eb012`
+- Assessment record hash: `92b2c32fa03512864a5acb1702f7391c9b05a08d9db668030c93609318de3aac`
+- Execution proof: [GitHub Actions run](https://github.com/GIFTEDLOV/driftproof/actions/runs/39111325157).
+- Source and release package: [GitHub workbench branch](https://github.com/GIFTEDLOV/driftproof/tree/workbench/genlayer-four-native-20261018/native/invoicebasis).
+
+**Evidence limitation:** On-chain validator consensus validates the semantic classification of supplied text; it does not independently authenticate that text's real-world origin. This is not a custody, payment, or legal ruling system. Negative-path live tests and second-round challenge qualification remain pending, as do the separate GitHub repositories requested for final submission.
 
 ## Consensus architecture
 
@@ -27,7 +42,7 @@ From this repository root run `python test_native.py` for **mocked direct-model*
 
 ## Provenance
 
-Contract SHA-256 before any further edits: `217eebe4aa84f1c70b2477443ff5607c67edf828fa286e9ff9fb1000667404f5`. See `manifest.json` for metadata; source hash must be recomputed before deployment.
+Canonical corrected contract SHA-256: `217eebe4aa84f1c70b2477443ff5607c67edf828fa286e9ff9fb1000667404f5`. See `manifest.json` for actual deployed transaction provenance and live qualification. Verify code parity on chain before final release.
 
 ## Links
 
