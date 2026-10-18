@@ -12,7 +12,7 @@ import hashlib
 from datetime import datetime, timezone
 
 NAME = "NoticeClock"
-SCHEMA = "NOTICECLOCK_V4"
+SCHEMA = "NOTICECLOCK_V3"
 KEYS = ('breach_identified', 'clause_applicable', 'requested_cure_clear', 'evidence_sufficient')
 MAX_TEXT = 4096
 MAX_RULE = 2048
@@ -127,12 +127,12 @@ class NoticeClock(gl.Contract):
             _fail('DUPLICATE_CASE')
         if type(deadline) is not int or deadline <= _now() or deadline > _now()+31536000:
             _fail('BAD_DEADLINE')
-        recipient_hex = (recipient if isinstance(recipient, str) else recipient.as_hex).lower()
+        recipient_hex = recipient.as_hex.lower() if hasattr(recipient, 'as_hex') else recipient.lower() if type(recipient) is str else ''
         _check_string(recipient_hex, 42)
         if not (recipient_hex.startswith('0x') and len(recipient_hex)==42 and all(c in '0123456789abcdef' for c in recipient_hex[2:])) or recipient_hex==_sender():
             _fail('BAD_RECIPIENT')
 
-        attestor_hex = (attestor if isinstance(attestor, str) else attestor.as_hex).lower()
+        attestor_hex = attestor.as_hex.lower() if hasattr(attestor, 'as_hex') else attestor.lower() if type(attestor) is str else ''
         _check_string(attestor_hex, 42)
         if (not (attestor_hex.startswith('0x') and len(attestor_hex)==42 and
                  all(c in '0123456789abcdef' for c in attestor_hex[2:])) or
