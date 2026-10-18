@@ -1,11 +1,29 @@
 {
-  "name": "parcelcourt",
-  "category": "GenLayer application",
-  "source": "contracts/parcelcourt.py",
-  "source_sha256": "6a55f3aca1d8c0c644f25bde9a3727b82cdcaae451bd87e1335974971cf2e2a2",
-  "network_target": "Studionet 61999",
-  "deployed": false,
-  "verified_genvm": false,
-  "verified_consensus": false,
-  "release_status": "NO_GO"
+  "project": "parcelcourt",
+  "name": "ParcelCourt",
+  "category": "GenLayer Application",
+  "releaseCandidate": "v0.2.0-studionet-20261018",
+  "chainId": 61999,
+  "rpc": "https://studio.genlayer.com/api",
+  "contractAddress": "0x14eBe8440453214CC5a923D5498402d5183A5Bcc",
+  "deploymentTransaction": "0x9ceb46a63225d949f4b238843be44ac235c2c52454352ed9ce064ab3fd661db5",
+  "sourceSha256": "277c62af5e6c8061489e0f5c5d49db25842df4df2422917f61ca0551aecd08ce",
+  "sourceCommit": "e35f8d7bc7c8c9a84986610090dd5ca59c569402",
+  "qualificationCase": "GN-parcelcourt-39111325157",
+  "qualificationVerdict": "SUPPORTED_DELIVERY",
+  "adjudicationTransaction": "0xff3696bc50a6b988de0146950e6eb21cefde20c1158196c1998d1d959eb80719",
+  "appendOnlyAssessmentHash": "46b76e0d387c643f8ac9a269f0a64aaf2c6f31bdff6123d373807c6ffd8cb12b",
+  "qualificationRun": "https://github.com/GIFTEDLOV/driftproof/actions/runs/39111325157",
+  "testRun": "https://github.com/GIFTEDLOV/driftproof/actions/runs/39110033698",
+  "methodCount": 10,
+  "consensusValidation": "positive-path GenLayer independent validators with live on-chain readback",
+  "status": "live-positive-path-qualified; additional negative-path and browser-wallet testing pending",
+  "sourceRepository": "https://github.com/GIFTEDLOV/driftproof/tree/workbench/genlayer-four-native-20261018/native/parcelcourt",
+  "limitations": [
+    "Evidence is party-provided and not authenticated to an external authority",
+    "Negative-path and two-round challenge network qualification is not yet complete",
+    "Standalone separate GitHub repository has not been created"
+  ],
+  "productionFrontend": "https://parcelcourt-genlayer.vercel.app",
+  "frontendWalletE2E": "unverified"
 }
