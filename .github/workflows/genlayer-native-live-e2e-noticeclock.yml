@@ -1,0 +1,103 @@
+name: NoticeClock Real State-Verified Consensus End-to-End
+on:
+  push:
+    branches: [workbench/genlayer-four-native-20261018]
+    paths: ['.github/workflows/genlayer-native-live-e2e-noticeclock.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  canonical:
+    runs-on: ubuntu-latest
+    timeout-minutes: 85
+    env:
+      DEPLOYED_ADDRESS: '0xDC02E6856e8DF12b0FaCB5e62a034Cb65a60eB1c'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Install supported stable CLI and JS SDK
+        run: |
+          npm i -g genlayer
+          npm i --no-save --ignore-scripts genlayer-js@1.1.8
+          genlayer network set studionet
+      - name: Create ephemeral distinct accounts; never print private keys
+        shell: bash
+        run: |
+          set -euo pipefail
+          PASS="$(openssl rand -hex 32)"
+          echo "::add-mask::$PASS"
+          echo "RUNNER_PASSWORD=$PASS" >> "$GITHUB_ENV"
+          genlayer account create --name notice-creator --password "$PASS" >/dev/null
+          genlayer account create --name notice-recipient --password "$PASS" >/dev/null
+          genlayer account use notice-recipient >/dev/null
+          OUT="$(genlayer account)"
+          ADDRESS="$(printf '%s' "$OUT" | sed -nE "s/.*address: '(0x[0-9a-fA-F]{40})'.*/\1/p" | head -n 1)"
+          test -n "$ADDRESS"
+          echo "RECIPIENT_ADDRESS=$ADDRESS" >> "$GITHUB_ENV"
+          genlayer account use notice-creator >/dev/null
+          echo "Unique creator and recipient ready on Studionet"
+      - name: Exercise durable case state and semantic consensus
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          export CASE_ID="NCE2E-${GITHUB_RUN_ID}"
+          DEADLINE="$(($(date -u +%s) + 86400))"
+          run_write() {
+            local step="$1";shift
+            printf '%s\n' "$RUNNER_PASSWORD" | genlayer write "$DEPLOYED_ADDRESS" "$step" --args "$@" >"evidence/$step.log" 2>&1 || {
+              echo "COMMAND_FAILED $step"; exit 1
+            }
+            STEP="$step" node <<'NODE'
+          const fs=require('fs'),s=fs.readFileSync('evidence/'+process.env.STEP+'.log','utf8').replace(/\x1B\[[0-9;]*[a-zA-Z]/g,'');
+          const id=s.match(/Write Transaction Hash:\s*\n?\s*(0x[0-9a-fA-F]{64})/)?.[1];
+          const txResults=[...s.matchAll(/execution_result:\s*'([A-Z]+)'/g)].map(x=>x[1]);
+          fs.appendFileSync('evidence/transactions.jsonl',JSON.stringify({operation:process.env.STEP,txHash:id||null,validatorExecutions:txResults,warning:'Validator trace alone does not establish canonical success'})+'\n');
+          console.log(JSON.stringify({operation:process.env.STEP,txHash:id||null,leaderAndValidatorResults:txResults}));
+          NODE
+          }
+          check_case(){
+            local want="$1"
+            WANT="$want" node --input-type=module <<'NODE'
+          import {createClient} from 'genlayer-js';
+          import {studionet} from 'genlayer-js/chains';
+          const client=createClient({chain:studionet});
+          const raw=await client.readContract({address:process.env.DEPLOYED_ADDRESS,functionName:'get_case',args:[process.env.CASE_ID]});
+          const caseState=JSON.parse(raw);
+          const want=process.env.WANT;
+          if(want==='CONSENTED' ? caseState.consented!==true : caseState.status!==want) {
+            console.log('STATE_FAILURE',JSON.stringify({want,actual:caseState.status,consented:caseState.consented}));
+            process.exit(1);
+          }
+          console.log('STATE_PROVEN',JSON.stringify({caseId:caseState.id,status:caseState.status,consented:caseState.consented,round:caseState.round,result:caseState.result}));
+          NODE
+          }
+          run_write create_case "$CASE_ID" "$RECIPIENT_ADDRESS" "Section 7 notice must identify the credential breach, cite the controlling provision, and request a clear remedy within 48 hours." "$DEADLINE"
+          check_case DRAFT
+          genlayer account use notice-recipient >/dev/null
+          run_write consent "$CASE_ID"
+          check_case CONSENTED
+          genlayer account use notice-creator >/dev/null
+          run_write freeze "$CASE_ID"
+          check_case FROZEN
+          run_write submit_evidence "$CASE_ID" "Notice under Section 7: credential security breach was observed. Required cure: reset compromised credentials and restore secured access within 48 hours. This is the complete written notice for reviewer assessment."
+          check_case EVIDENCE_LOCKED
+          run_write adjudicate "$CASE_ID"
+          check_case ASSESSED
+          node --input-type=module <<'NODE'
+          import {createClient} from 'genlayer-js';
+          import {studionet} from 'genlayer-js/chains';
+          const c=createClient({chain:studionet});
+          const rows=JSON.parse(await c.readContract({address:process.env.DEPLOYED_ADDRESS,functionName:'get_history',args:[process.env.CASE_ID]}));
+          if(rows.length!==1||!rows[0].vector||!rows[0].verdict)throw new Error('No canonical semantic assessment');
+          console.log('LIVE_CONSENSUS_VERDICT',JSON.stringify({caseId:process.env.CASE_ID,rounds:rows.length,vector:rows[0].vector,verdict:rows[0].verdict,entryHash:rows[0].entry_hash}));
+          NODE
+      - name: Preserve bounded nonsecret proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: noticeclock-live-state-verified
+          path: evidence/transactions.jsonl
+          retention-days: 30
+          if-no-files-found: warn
