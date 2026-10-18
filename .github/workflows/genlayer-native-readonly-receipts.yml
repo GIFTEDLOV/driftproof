@@ -1,0 +1,55 @@
+name: GenLayer Native Read-only Canonical Receipts
+on:
+  push:
+    branches: [workbench/genlayer-four-native-20261018]
+    paths: ['.github/workflows/genlayer-native-readonly-receipts.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Install official GenLayerJS
+        run: npm install --no-save --ignore-scripts genlayer-js@1.1.8
+      - name: Read saved original tx id without rebroadcast
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: GIFTEDLOV/driftproof
+        run: |
+          mkdir -p /tmp/proof
+          gh run download 39110332929 -n noticeclock-live-qualification -D /tmp/proof
+          python - <<'PY'
+          import re,os
+          s=open('/tmp/proof/create.log').read()
+          s=re.sub(r'\x1b\[[0-9;]*[a-zA-Z]','',s)
+          m=re.search(r'Write Transaction Hash:\s*\n?\s*(0x[a-fA-F0-9]{64})',s)
+          print('Recovered transaction hash:', m.group(1) if m else 'not found')
+          if m:
+            with open(os.environ['GITHUB_ENV'],'a') as f:f.write('CREATE_TX='+m.group(1)+'\n')
+          PY
+      - name: Canonical SDK readback and transaction receipt
+        run: |
+          node --input-type=module <<'NODE'
+          import {createClient,isSuccessful} from 'genlayer-js';
+          import {studionet} from 'genlayer-js/chains';
+          const cli=createClient({chain:studionet});
+          const addr='0xDC02E6856e8DF12b0FaCB5e62a034Cb65a60eB1c';
+          for (const [functionName,args] of [['contract_info',[]],['get_case',['NC-QUAL-39110332929']]]) {
+            try {
+              const result=await cli.readContract({address:addr,functionName,args});
+              console.log('readback',functionName,typeof result==='string'?result.slice(0,1600):JSON.stringify(result,(k,v)=>typeof v==='bigint'?String(v):v).slice(0,1600));
+            }catch(e){console.log('READ_ERROR',functionName,String(e?.shortMessage||e?.message||e).slice(0,400))}
+          }
+          if(process.env.CREATE_TX) {
+            try {
+              const receipt=await cli.waitForFinalization({hash:process.env.CREATE_TX});
+              console.log('TX_LIFECYCLE',JSON.stringify({hash:process.env.CREATE_TX,statusName:receipt.statusName,txExecutionResultName:receipt.txExecutionResultName,isSuccessful:isSuccessful(receipt)},null,2));
+            }catch(e){console.log('RECEIPT_ERROR',String(e?.shortMessage||e?.message||e).slice(0,500))}
+          }
+          NODE
