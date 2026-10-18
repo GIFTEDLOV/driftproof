@@ -2,9 +2,24 @@
 
 **Category:** Standalone Intelligent Contract  
 **Version:** `0.1.0` development candidate  
-**Release gate:** NOT DEPLOYED / NOT SUBMISSION READY
+**Release gate:** Studionet deployed; positive-path independently consensus-qualified; final reviewer/security gates pending
 
 Enforce consent-bound notice/cure rules while GenLayer validators independently classify breach identification, applicability and cure specificity.
+
+## Verified Studionet implementation — October 18, 2026
+
+- Category: **Standalone Intelligent Contract**. Consent-bound notice and cure requirements verified by independent GenLayer semantic consensus.
+- Network: GenLayer Studionet (chain 61999)
+- Address: `0xDC02E6856e8DF12b0FaCB5e62a034Cb65a60eB1c`
+- Deployment tx: `0x8577cfc174227d552d3eecf6c57121aae5297b5bfd42e76cbbe1dcf923ef6222`
+- Corrected contract source SHA-256: `7137b72ac8a04debd77a4243a3c54884bd626fd30d623d51044153a3b39787c5`
+- Live case: `NCE2E-39111069673`; decision: **READY**
+- Adjudication tx: `0x955416e32d83fc5de1ad561cbcdc83a65298ad4dbc4ea59b3d54e883027db1ce`
+- Assessment record hash: `a0e4a8c999a610140278d38d2eaa2454a9a12159a766c6ebfc9040e43518d2d6`
+- Execution proof: [GitHub Actions run](https://github.com/GIFTEDLOV/driftproof/actions/runs/39111069673).
+- Source and release package: [GitHub workbench branch](https://github.com/GIFTEDLOV/driftproof/tree/workbench/genlayer-four-native-20261018/native/noticeclock).
+
+**Evidence limitation:** On-chain validator consensus validates the semantic classification of supplied text; it does not independently authenticate that text's real-world origin. This is not a custody, payment, or legal ruling system. Negative-path live tests and second-round challenge qualification remain pending, as do the separate GitHub repositories requested for final submission.
 
 ## Consensus architecture
 
@@ -27,7 +42,7 @@ From this repository root run `python test_native.py` for **mocked direct-model*
 
 ## Provenance
 
-Contract SHA-256 before any further edits: `a2a1e6b027e00dd61efaf18fb1c4e89135c83c9ca07b2c2c0dd14cd5e72cc626`. See `manifest.json` for metadata; source hash must be recomputed before deployment.
+Canonical corrected contract SHA-256: `a2a1e6b027e00dd61efaf18fb1c4e89135c83c9ca07b2c2c0dd14cd5e72cc626`. See `manifest.json` for actual deployed transaction provenance and live qualification. Verify code parity on chain before final release.
 
 ## Links
 
