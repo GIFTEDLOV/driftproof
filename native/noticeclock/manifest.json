@@ -1,0 +1,11 @@
+{
+  "name": "noticeclock",
+  "category": "Standalone Intelligent Contract",
+  "source": "contracts/noticeclock.py",
+  "source_sha256": "a2a1e6b027e00dd61efaf18fb1c4e89135c83c9ca07b2c2c0dd14cd5e72cc626",
+  "network_target": "Studionet 61999",
+  "deployed": false,
+  "verified_genvm": false,
+  "verified_consensus": false,
+  "release_status": "NO_GO"
+}
