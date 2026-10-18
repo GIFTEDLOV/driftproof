@@ -12,7 +12,7 @@ import hashlib
 from datetime import datetime, timezone
 
 NAME = "InvoiceBasis"
-SCHEMA = "INVOICEBASIS_V3"
+SCHEMA = "INVOICEBASIS_V4"
 KEYS = ('in_eligible_class', 'exclusion_applies', 'evidence_sufficient')
 MAX_TEXT = 4096
 MAX_RULE = 2048

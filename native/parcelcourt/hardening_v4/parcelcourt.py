@@ -12,7 +12,7 @@ import hashlib
 from datetime import datetime, timezone
 
 NAME = "ParcelCourt"
-SCHEMA = "PARCELCOURT_V3"
+SCHEMA = "PARCELCOURT_V4"
 KEYS = ('handoff_matches_promise', 'authorized_recipient_supported', 'evidence_sufficient')
 MAX_TEXT = 4096
 MAX_RULE = 2048

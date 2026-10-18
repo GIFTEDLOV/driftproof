@@ -12,7 +12,7 @@ import hashlib
 from datetime import datetime, timezone
 
 NAME = "ShiftFair"
-SCHEMA = "SHIFTFAIR_V3"
+SCHEMA = "SHIFTFAIR_V4"
 KEYS = ('supervisor_authorized', 'attendance_matches_shift', 'evidence_sufficient')
 MAX_TEXT = 4096
 MAX_RULE = 2048
