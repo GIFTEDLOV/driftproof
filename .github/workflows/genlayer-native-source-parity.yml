@@ -14,41 +14,45 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: {node-version: '24'}
-      - name: Install published stable GenLayerJS
-        run: npm install --no-save --ignore-scripts genlayer-js@1.1.8
-      - name: Compare actual deployed code and canonical candidate bytes
+      - name: Probe read-only GenLayer RPC source retrieval variants
         run: |
-          node --input-type=module <<'NODE'
-          import fs from 'node:fs';
-          import crypto from 'node:crypto';
-          import {createClient} from 'genlayer-js';
-          import {studionet} from 'genlayer-js/chains';
-          const client=createClient({chain:studionet});
-          const cases=[
+          node <<'NODE'
+          const fs=require('fs'),crypto=require('crypto');
+          const pairs=[
             ['noticeclock','0xDC02E6856e8DF12b0FaCB5e62a034Cb65a60eB1c'],
             ['invoicebasis','0x0f0feAeE0AeAa4c98551622B074436565505A821'],
             ['parcelcourt','0x14eBe8440453214CC5a923D5498402d5183A5Bcc'],
-            ['shiftfair','0xEEbed1EB184a4BE845286B5EF0003bCbFDB10C0C']
-          ];
-          const sha=buf=>crypto.createHash('sha256').update(buf).digest('hex');
-          let failed=0;
-          for(const [name,address] of cases){
-            const local=fs.readFileSync('native/'+name+'/contracts/'+name+'.py');
-            try {
-              const code=await client.getContractCode({address});
-              let source=typeof code==='string'?Buffer.from(code,'utf8'):Buffer.from(code);
-              let decoded='raw';
-              if(source[0]!==35 && typeof code==='string'){
-                const b=Buffer.from(code,'base64');
-                if(b[0]===35){source=b;decoded='base64';}
-              }
-              const same=source.equals(local);
-              console.log(JSON.stringify({name,address,encoding:decoded,sourceSha256:sha(local),deployedSha256:sha(source),localBytes:local.length,deployedBytes:source.length,exactByteParity:same}));
-              if(!same)failed++;
-            }catch(e){
-              failed++;
-              console.log(JSON.stringify({name,address,error:String(e?.message||e).slice(0,300),exactByteParity:false}));
-            }
+            ['shiftfair','0xEEbed1EB184a4BE845286B5EF0003bCbFDB10C0C']];
+          const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
+          async function rpc(method,params){
+            const ctl=new AbortController(),id=setTimeout(()=>ctl.abort(),12000);
+            try{const r=await fetch('https://studio.genlayer.com/api',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:4,method,params}),signal:ctl.signal});return await r.json();}
+            finally{clearTimeout(id)}
           }
-          if(failed)process.exit(1);
+          let failures=0;
+          for(const [name,address] of pairs){
+            const local=fs.readFileSync('native/'+name+'/contracts/'+name+'.py');
+            const variants=[
+              ['gen_getContractCode',[address]],
+              ['gen_getContractCode',[{address,status:'finalized'}]],
+              ['eth_getCode',[address,'latest']],
+            ];
+            let good=false;
+            for(const [method,params] of variants){
+              try{
+                const data=await rpc(method,params);
+                if(data.error){console.log('RPC_ERROR',name,method,JSON.stringify(data.error).slice(0,120));continue;}
+                const value=data.result?.code??data.result?.data??data.result;
+                if(typeof value!=='string'){console.log('UNSUPPORTED_CODE_SHAPE',name,method,typeof value);continue;}
+                const candidates=[['utf8',Buffer.from(value,'utf8')],['base64',Buffer.from(value,'base64')]];
+                for(const [encoding,b] of candidates){
+                  if(b.equals(local)){console.log('EXACT_SOURCE_PARITY',JSON.stringify({name,address,method,encoding,sha256:sha(local),bytes:local.length}));good=true;break;}
+                }
+                if(good)break;
+                console.log('RPC_SOURCE_MISMATCH',JSON.stringify({name,method,responseBytes:value.length,expectedBytes:local.length,expectedSha256:sha(local),utf8Sha256:sha(Buffer.from(value))}));
+              }catch(e){console.log('RPC_EXCEPTION',name,method,String(e?.message||e).slice(0,180));}
+            }
+            if(!good)failures++;
+          }
+          if(failures)process.exit(1);
           NODE
