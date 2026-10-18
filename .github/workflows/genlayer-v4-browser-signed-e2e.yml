@@ -1,0 +1,48 @@
+name: GenLayer V4 - Browser Wallet Real Signed E2E
+on:
+  push:
+    branches: [workbench/genlayer-four-native-20261018]
+    paths: ['.github/workflows/genlayer-v4-browser-signed-e2e.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: genlayer-v4-browser-signed-single-${{ github.sha }}
+  cancel-in-progress: false
+jobs:
+  signed-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Preflight Studionet identity and immutable V4 contract bytes
+        run: |
+          node <<'NODE'
+          const checks=[
+            ['ParcelCourt','0xC0B3De8897015a9aAfDc06EB4d09FD2F4d62BA72','302a0db3f6eca2266677af095ab98a80765221f890f3fd0d028bfaf88de7e224'],
+            ['ShiftFair','0xdB7419b175bb5Ff63343f8a9Ac7f42f11feA03Fd','958bc9996945b9064abd98b7a712b799dc7d9905de89b2ca7305b8e0cefaf2d5']
+          ];
+          const crypto=require('node:crypto');
+          async function rpc(method,params){const r=await fetch('https://studio.genlayer.com/api',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',method,params,id:1})});const d=await r.json();if(!r.ok||d.error)throw Error(JSON.stringify(d.error||r.status));return d.result}
+          (async()=>{
+            if(Number.parseInt(await rpc('eth_chainId',[]),16)!==61999)throw Error('Unexpected chain ID');
+            for(const [name,address,sha]of checks){const src=Buffer.from(await rpc('gen_getContractCode',[address]),'base64');const actual=crypto.createHash('sha256').update(src).digest('hex');if(actual!==sha)throw Error(name+' V4 source parity mismatch');console.log(name,'VERIFIED_V4_SOURCE',sha)}
+          })().catch(e=>{console.error(e);process.exitCode=1});
+          NODE
+      - name: Install pinned SDK, Viem signer, and Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright viem genlayer-js@1.1.8
+          npx playwright install --with-deps chromium
+          node --check native/v4_browser_signed_single.mjs
+      - name: Single ephemeral signed browser create-case per app; preserve uncertain transaction state
+        run: node native/v4_browser_signed_single.mjs
+      - name: Preserve signed execution and canonical evidence without private keys
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genlayer-v4-real-signed-browser-evidence
+          path: browser-signed-proof/*
+          if-no-files-found: warn
+          retention-days: 30
