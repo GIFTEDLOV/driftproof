@@ -11,7 +11,7 @@ const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp
 const shorten = value => String(value ?? '').length > 22 ? `${String(value).slice(0,12)}…${String(value).slice(-7)}` : String(value ?? '');
 const stringify = obj => JSON.stringify(obj, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2);
 const validContract = /^0x[a-fA-F0-9]{40}$/.test(ADDRESS || '');
-let page = 'Overview';
+let page = APP.view[0];
 let live = { cases: [], ids: [], histories: {}, loading: false, error: '', checkedAt: null, complete: false };
 let activeSearch = '';
 const parsed = value => typeof value === 'string' ? JSON.parse(value) : value;
@@ -36,7 +36,7 @@ function render(name){
   const safeEmpty = loadingNote();
   const records = cases.filter(x=>(x.id+' '+(x.status||'')+' '+(x.rule||'')).toLowerCase().includes(activeSearch.toLowerCase()));
   const counts={total:cases.length,frozen:cases.filter(x=>['FROZEN','EVIDENCE_LOCKED','ATTESTED'].includes(x.status)).length,assessed:cases.filter(x=>x.round>0).length,challenged:cases.filter(x=>(x.challenges||[]).length>0).length};
-  if(name==='Overview') return progress()+`<div class="stats">${[['Recorded cases',counts.total],['Evidence workflow',counts.frozen],['Consensus assessed',counts.assessed],['Contested cases',counts.challenged]].map(([k,v])=>`<div class="stat"><div class="eyebrow">${esc(k)}</div><div class="value">${v}</div><small>Live, read-only count</small></div>`).join('')}</div>`+`<div class="columns">${panel('Latest actual contract cases',safeEmpty+renderCases(cases.slice().reverse().slice(0,10)),`${counts.total} loaded of up to 100`)}${panel('Contract and execution integrity',`<div class="risk"><div class="risk-item"><div class="eyebrow">CONTRACT</div><p class="mono">${esc(ADDRESS)}</p></div><div class="risk-item"><div class="eyebrow">FINALITY RULE</div><p>Consensus agreement alone is not execution success. A verified action requires a successful GenVM receipt and exact on-chain state readback.</p></div><div class="risk-item"><div class="eyebrow">EXTERNAL EVIDENCE</div><p>A signed attestor statement proves the wallet making the claim, not independently verified issuer identity or document truth.</p></div></div>`,'Steward integrity checks')}</div>`+`<div class="toolbar" style="margin-top:16px">${refreshButton}<button id="open-onchain" class="cta">Open on-chain case workspace</button></div>`;
+  if(name===APP.view[0]) return progress()+`<div class="stats">${[['Recorded cases',counts.total],['Evidence workflow',counts.frozen],['Consensus assessed',counts.assessed],['Contested cases',counts.challenged]].map(([k,v])=>`<div class="stat"><div class="eyebrow">${esc(k)}</div><div class="value">${v}</div><small>Live, read-only count</small></div>`).join('')}</div>`+`<div class="columns">${panel('Latest actual contract cases',safeEmpty+renderCases(cases.slice().reverse().slice(0,10)),`${counts.total} loaded of up to 100`)}${panel('Contract and execution integrity',`<div class="risk"><div class="risk-item"><div class="eyebrow">CONTRACT</div><p class="mono">${esc(ADDRESS)}</p></div><div class="risk-item"><div class="eyebrow">FINALITY RULE</div><p>Consensus agreement alone is not execution success. A verified action requires a successful GenVM receipt and exact on-chain state readback.</p></div><div class="risk-item"><div class="eyebrow">EXTERNAL EVIDENCE</div><p>A signed attestor statement proves the wallet making the claim, not independently verified issuer identity or document truth.</p></div></div>`,'Steward integrity checks')}</div>`+`<div class="toolbar" style="margin-top:16px">${refreshButton}<button id="open-onchain" class="cta">Open on-chain case workspace</button></div>`;
   if(['Cases','Claims'].includes(name)) return progress()+panel('Canonical case registry',`<div class="toolbar"><input id="case-filter" class="input" aria-label="Search actual cases" placeholder="Search case ID, status or frozen rule" value="${esc(activeSearch)}"/>${refreshButton}</div>${safeEmpty}<div id="filtered-cases">${renderCases(records)}</div>`,'Contract get_case_ids_page(0,100) + get_case');
   if(['Evidence','Policies'].includes(name)) return progress()+panel(name==='Evidence'?'Attested evidence registry':'Frozen policies',safeEmpty+(cases.length?`<div class="case-list">${cases.map(r=>`<div class="case-row" role="button" tabindex="0" data-live-case="${esc(r.id)}"><b>${esc(r.id)}</b><span><b>${esc(name==='Evidence'?(r.evidence_hash||'No locked evidence'):(r.rule_hash||'Unfrozen rule'))}</b><small class="desc">Source ${esc(r.source_ref||'No attested source')} · Attestor ${esc(shorten(r.attestor))}</small></span>${badge(r)}<small>${esc(r.attested?'Attested':'Not attested')}</small></div>`).join('')}</div>`:renderCases([])),`Only contract-recorded ${name.toLowerCase()}`)+`<div class="toolbar" style="margin-top:16px">${refreshButton}</div>`;
   if(name==='Challenges') return progress()+panel('Challenge ledger',safeEmpty+(cases.filter(r=>(r.challenges||[]).length>0).length?`<div class="case-list">${cases.filter(r=>(r.challenges||[]).length>0).map(r=>`<div class="case-row" role="button" tabindex="0" data-live-case="${esc(r.id)}"><b>${esc(r.id)}</b><span><b>${esc((r.challenges||[]).length)} submitted challenge(s)</b><small class="desc">Immutable challenge hash ${esc(r.challenge_hash||'')}</small></span>${badge(r)}</div>`).join('')}</div>`:'<div class="blank">No submitted challenge records yet.</div>'),'Two parties have separate challenge slots')+`<div class="toolbar" style="margin-top:16px">${refreshButton}</div>`;
@@ -61,8 +61,8 @@ function nav(name,doRefresh=true){
   page=name;
   document.querySelectorAll('nav button').forEach(e=>e.classList.toggle('active',e.dataset.page===name));
   $('page-name').textContent=name;
-  $('hero-title').textContent=name==='Overview'?APP.tagline:name;
-  $('hero-subtitle').textContent=name==='Overview'?APP.subtitle:'Actual contract state and accountable evidence';
+  $('hero-title').textContent=name===APP.view[0]?APP.tagline:name;
+  $('hero-subtitle').textContent=name===APP.view[0]?APP.subtitle:'Actual contract state and accountable evidence';
   $('main-content').innerHTML=render(name);
   bind();
   history.replaceState({},'', '#'+encodeURIComponent(name.toLowerCase()));
@@ -96,4 +96,4 @@ $('primary-action')?.addEventListener('click',()=>nav('On-chain'));
 $('close-unavailable')?.addEventListener('click',()=>{$('unavailable-modal').hidden=true});
 $('close-detail')?.addEventListener('click',()=>{$('detail-modal').hidden=true});
 const fromHash=decodeURIComponent(location.hash.slice(1)).toLowerCase();
-nav([...APP.view,'On-chain'].find(x=>x.toLowerCase()===fromHash)||'Overview');
+nav([...APP.view,'On-chain'].find(x=>x.toLowerCase()===fromHash)||APP.view[0]);

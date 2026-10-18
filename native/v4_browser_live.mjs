@@ -1,8 +1,8 @@
 import { chromium } from 'playwright';
 import fs from 'node:fs';
 const apps=[
-{name:'ParcelCourt',url:'https://parcelcourt-genlayer.vercel.app',known:'GLV4-parcelcourt-39138161003'},
-{name:'ShiftFair',url:'https://shiftfair-genlayer.vercel.app',known:'GLV4-shiftfair-39138161003'}
+{name:'ParcelCourt',url:'https://parcelcourt-genlayer.vercel.app',known:'GLV4-parcelcourt-39138161003',tab:'Cases'},
+{name:'ShiftFair',url:'https://shiftfair-genlayer.vercel.app',known:'GLV4-shiftfair-39138161003',tab:'Claims'}
 ];
 const browser=await chromium.launch({headless:true,args:['--no-sandbox']});let failed=false;
 fs.mkdirSync('browser-proof',{recursive:true});
@@ -11,7 +11,7 @@ try{
   let errors=[];page.on('pageerror',e=>errors.push(String(e).slice(0,250)));
   await page.goto(app.url,{waitUntil:'domcontentloaded',timeout:35000});
   await page.waitForTimeout(2200);
-  await page.locator('nav button[data-page="Cases"]').click();
+  await page.locator(`nav button[data-page="${app.tab}"]`).click();
   await page.locator('#case-filter').waitFor({timeout:20000});
   await page.waitForFunction((id)=>document.querySelector('#main-content')?.innerText?.includes(id)||document.querySelector('#main-content')?.innerText?.includes('Live read failed:'),app.known,{timeout:55000});
   const cases=await page.locator('#main-content').innerText();
