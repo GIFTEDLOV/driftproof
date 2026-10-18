@@ -1,0 +1,41 @@
+name: GenLayer Studionet live RPC probe
+on:
+  push:
+    branches: [workbench/genlayer-four-native-20261018]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify_studionet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check Studionet first; fallback to Studio-dev only on failure
+        shell: bash
+        run: |
+          node <<'NODE'
+          const endpoints = [
+            {network:'studionet',url:'https://studio.genlayer.com/api',expected:61999},
+            {network:'studio-dev',url:'https://studio-dev.genlayer.com/api',expected:61997},
+          ];
+          async function check(item) {
+            const ctl = new AbortController();
+            const timer = setTimeout(()=>ctl.abort(),12000);
+            try {
+              const response = await fetch(item.url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_chainId',params:[]}),signal:ctl.signal});
+              const data = await response.json();
+              const chain = Number.parseInt(data.result,16);
+              const ok = response.ok && chain===item.expected;
+              process.stdout.write(JSON.stringify({network:item.network,http:response.status,chainId:chain,ok,error:data.error||null})+'\n');
+              return ok;
+            } catch(e) {
+              process.stdout.write(JSON.stringify({network:item.network,ok:false,error:String(e)})+'\n');
+              return false;
+            } finally {clearTimeout(timer)}
+          }
+          (async()=>{
+            if(await check(endpoints[0])) return;
+            if(await check(endpoints[1])) return;
+            process.exitCode=1;
+          })().catch(e=>{console.error(String(e));process.exitCode=1});
+          NODE
