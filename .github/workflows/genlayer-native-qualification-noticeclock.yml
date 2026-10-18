@@ -1,0 +1,90 @@
+name: NoticeClock Live Consensus Qualification
+on:
+  push:
+    branches:
+      - workbench/genlayer-four-native-20261018
+    paths:
+      - '.github/workflows/genlayer-native-qualification-noticeclock.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      ADDRESS: '0x368800fa3215b63bf3f9907a4c9481a75f23D724'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install CLI and verify correct network
+        run: |
+          npm i -g genlayer
+          genlayer network set studionet
+          genlayer network info
+      - name: Read published contract schema and identity
+        run: |
+          set -euo pipefail
+          mkdir -p live-proof
+          genlayer schema "$ADDRESS" >live-proof/schema.txt 2>&1
+          genlayer code "$ADDRESS" >live-proof/deployed-code.txt 2>&1
+          genlayer call "$ADDRESS" contract_info >live-proof/contract-info.txt 2>&1
+          grep -Ei 'NoticeClock|NOTICECLOCK_V1|contract_info|name' live-proof/contract-info.txt | cut -c 1-160 | tail -n 8 || true
+      - name: Set up two independent test principals
+        shell: bash
+        run: |
+          set -euo pipefail
+          P="$(openssl rand -hex 32)"
+          echo "::add-mask::$P"
+          echo "SECRET=$P" >> "$GITHUB_ENV"
+          genlayer account create --name nc-creator --password "$P" >/dev/null
+          genlayer account create --name nc-recipient --password "$P" >/dev/null
+          genlayer account use nc-recipient >/dev/null
+          OUT="$(genlayer account)"
+          RECIPIENT="$(printf '%s' "$OUT" | sed -nE "s/.*address: '(0x[0-9a-fA-F]{40})'.*/\1/p" | head -n 1)"
+          test -n "$RECIPIENT"
+          echo "RECIPIENT=$RECIPIENT" >> "$GITHUB_ENV"
+          genlayer account use nc-creator >/dev/null
+          echo "Two distinct principal accounts ready"
+      - name: Real GenLayer notice and semantic validation lifecycle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p live-proof
+          CASE_ID="NC-QUAL-${GITHUB_RUN_ID}"
+          DEADLINE="$(($(date -u +%s) + 86400))"
+          echo "CASE_ID=$CASE_ID" >> "$GITHUB_ENV"
+          one () {
+            local step="$1"
+            shift
+            echo "START $step"
+            if ! printf '%s\n' "$SECRET" | genlayer "$@" >"live-proof/$step.log" 2>&1; then
+              echo "FAILED $step. No blind retransmission."
+              grep -Ei 'error|fail|reason|transaction|timeout|invalid' "live-proof/$step.log" | cut -c1-240 | tail -n 18 || true
+              exit 1
+            fi
+            grep -Ei "Transaction Hash|Contract Method|execution_result:|'Contract Address'|FINALIZED|successfully" "live-proof/$step.log" | cut -c1-240 | tail -n 12 || true
+          }
+          one create write "$ADDRESS" create_case --args "$CASE_ID" "$RECIPIENT" "The notice must specify a breach of Section 7 and clearly request that credentials be restored within 48 hours." "$DEADLINE"
+          genlayer account use nc-recipient >/dev/null
+          one consent write "$ADDRESS" consent --args "$CASE_ID"
+          genlayer account use nc-creator >/dev/null
+          one freeze write "$ADDRESS" freeze --args "$CASE_ID"
+          one evidence write "$ADDRESS" submit_evidence --args "$CASE_ID" "Notice to respondent under Section 7: breach is failure to protect account credentials. Required cure: restore secured access within 48 hours of this notice. Delivered by recorded email on the stated date."
+          one adjudicate write "$ADDRESS" adjudicate --args "$CASE_ID"
+          one readback call "$ADDRESS" get_case --args "$CASE_ID"
+          one history call "$ADDRESS" get_history --args "$CASE_ID"
+          grep -Ei 'READY|INCONCLUSIVE|INVALID|ASSESSED|NOTICECLOCK' live-proof/readback.log | cut -c1-240 | tail -n 14 || true
+      - name: Preserve nonsecret qualification logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: noticeclock-live-qualification
+          path: |
+            live-proof/*.log
+            live-proof/schema.txt
+            live-proof/contract-info.txt
+          retention-days: 30
+          if-no-files-found: warn
