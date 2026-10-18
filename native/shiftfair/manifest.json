@@ -1,11 +1,29 @@
 {
-  "name": "shiftfair",
-  "category": "GenLayer application",
-  "source": "contracts/shiftfair.py",
-  "source_sha256": "10f8a287044200212bd5e6ad420b3de97d0e91f45949c12ae27571718fc929f3",
-  "network_target": "Studionet 61999",
-  "deployed": false,
-  "verified_genvm": false,
-  "verified_consensus": false,
-  "release_status": "NO_GO"
+  "project": "shiftfair",
+  "name": "ShiftFair",
+  "category": "GenLayer Application",
+  "releaseCandidate": "v0.2.0-studionet-20261018",
+  "chainId": 61999,
+  "rpc": "https://studio.genlayer.com/api",
+  "contractAddress": "0xEEbed1EB184a4BE845286B5EF0003bCbFDB10C0C",
+  "deploymentTransaction": "0x8f65e9aaebad130345b24a60ba09d49de3287d4262a957317f1515d001e082d5",
+  "sourceSha256": "bdac7c6c778fbef9542350613dfb9fd6d73b8b8d4d1e3124816344d2958874e0",
+  "sourceCommit": "e35f8d7bc7c8c9a84986610090dd5ca59c569402",
+  "qualificationCase": "GN-shiftfair-39111325157",
+  "qualificationVerdict": "APPROVED",
+  "adjudicationTransaction": "0xf48e1068c39d404dc4c5063411dbaf2337c67bdcec7194ec30cc7dc9a994aee0",
+  "appendOnlyAssessmentHash": "9d48bf997f005b464f9f2dcfe56479c12b24e96f1e6723af59838f4d0d18447b",
+  "qualificationRun": "https://github.com/GIFTEDLOV/driftproof/actions/runs/39111325157",
+  "testRun": "https://github.com/GIFTEDLOV/driftproof/actions/runs/39110033698",
+  "methodCount": 10,
+  "consensusValidation": "positive-path GenLayer independent validators with live on-chain readback",
+  "status": "live-positive-path-qualified; additional negative-path and browser-wallet testing pending",
+  "sourceRepository": "https://github.com/GIFTEDLOV/driftproof/tree/workbench/genlayer-four-native-20261018/native/shiftfair",
+  "limitations": [
+    "Evidence is party-provided and not authenticated to an external authority",
+    "Negative-path and two-round challenge network qualification is not yet complete",
+    "Standalone separate GitHub repository has not been created"
+  ],
+  "productionFrontend": "https://shiftfair-genlayer.vercel.app",
+  "frontendWalletE2E": "unverified"
 }
