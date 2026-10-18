@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
-      ADDRESS: '0x368800fa3215b63bf3f9907a4c9481a75f23D724'
+      ADDRESS: '0xDC02E6856e8DF12b0FaCB5e62a034Cb65a60eB1c'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -65,7 +65,13 @@ jobs:
               grep -Ei 'error|fail|reason|transaction|timeout|invalid' "live-proof/$step.log" | cut -c1-240 | tail -n 18 || true
               exit 1
             fi
-            grep -Ei "Transaction Hash|Contract Method|execution_result:|'Contract Address'|FINALIZED|successfully" "live-proof/$step.log" | cut -c1-240 | tail -n 12 || true
+            if grep -q "execution_result: 'ERROR'" "live-proof/$step.log"; then
+              echo "CONTRACT_EXECUTION_FAILED $step — not retrying"; grep -E "rollback|execution_result:|result:" "live-proof/$step.log" | cut -c1-220 | head -n 12 || true; exit 1
+            fi
+            if [[ "$step" != readback && "$step" != history ]] && ! grep -q "execution_result: 'SUCCESS'" "live-proof/$step.log"; then
+              echo "EXECUTION_SUCCESS_UNCONFIRMED $step"; exit 1
+            fi
+            grep -Ei "Write Transaction Hash:|execution_result:|'Contract Address'|FINALIZED|successfully" "live-proof/$step.log" | cut -c1-240 | tail -n 12 || true
           }
           one create write "$ADDRESS" create_case --args "$CASE_ID" "$RECIPIENT" "The notice must specify a breach of Section 7 and clearly request that credentials be restored within 48 hours." "$DEADLINE"
           genlayer account use nc-recipient >/dev/null
