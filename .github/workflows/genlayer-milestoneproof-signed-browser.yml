@@ -1,0 +1,51 @@
+name: MilestoneProof - Real Signed Chromium Wallet Qualification
+on:
+  push:
+    branches: [workbench/genlayer-new-warrantylens-milestoneproof-20261019]
+    paths: ['.github/workflows/genlayer-milestoneproof-signed-browser.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: milestoneproof-browser-signed-20261019
+  cancel-in-progress: false
+jobs:
+  actual-wallet-sign-and-onchain-state:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Verify immutable onchain source before signed browser write
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),crypto=require('crypto');
+          const address='0xD4AdDBe785176EfC96da0B371FfBa03C5ff6c0c9';
+          const expected='1b7a7424b4195ff6df0bd622aa9cdfce79aba2e49a05feb00a9385dafae8610b';
+          (async()=>{
+            const bytes=fs.readFileSync('native/milestoneproof/contracts/milestoneproof.py');
+            if(crypto.createHash('sha256').update(bytes).digest('hex')!==expected)throw Error('Source HEAD SHA mismatch');
+            const response=await fetch('https://studio.genlayer.com/api',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',method:'gen_getContractCode',params:[address],id:1})});
+            const data=await response.json();if(!response.ok||data.error)throw Error('RPC '+JSON.stringify(data.error||response.status));
+            if(crypto.createHash('sha256').update(Buffer.from(data.result,'base64')).digest('hex')!==expected)throw Error('Deployed byte mismatch');
+            console.log('BROWSER_SOURCE_PARITY_PASS');
+          })().catch(e=>{console.error(e);process.exitCode=1});
+          NODE
+      - name: Install pinned SDK, viem and real Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright viem genlayer-js@1.1.8
+          npx playwright install --with-deps chromium
+          node --check native/milestoneproof/browser_signed_milestoneproof.mjs
+      - name: One real ephemeral-signer browser wallet tx and canonical readback
+        run: node native/milestoneproof/browser_signed_milestoneproof.mjs
+      - name: Retain first-broadcast hash, receipt and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: milestoneproof-signed-browser-20261019-evidence
+          path: browser-signed-proof/*
+          retention-days: 30
+          if-no-files-found: warn
