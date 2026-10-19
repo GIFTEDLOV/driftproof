@@ -1,0 +1,54 @@
+name: GenLayer Two New Contracts - Quality Gates
+on:
+  push:
+    branches: [workbench/genlayer-new-warrantylens-milestoneproof-20261019]
+    paths:
+      - 'native/warrantylens/**'
+      - 'native/milestoneproof/**'
+      - '.github/workflows/genlayer-new-20261019-quality.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  genvm-and-adversarial-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install GenVM linter and pytest
+        run: python -m pip install --disable-pip-version-check genvm-linter pytest
+      - name: Contract isolated mock adversarial tests
+        run: python -m pytest -q --import-mode=importlib native/warrantylens/tests native/milestoneproof/tests
+      - name: Actual GenVM SDK syntax and exact ABI
+        run: |
+          set -euo pipefail
+          for app in warrantylens milestoneproof; do
+            file="native/$app/contracts/$app.py"
+            python -m py_compile "$file"
+            genvm-lint check "$file"
+            genvm-lint schema "$file" --json > "/tmp/$app-abi.json"
+            test -s "/tmp/$app-abi.json"
+          done
+  dapp-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build independent GenLayerJS app
+        run: |
+          set -euo pipefail
+          cd native/milestoneproof/web
+          npm install --no-audit --no-fund
+          npm run check
+          npm run build
+          test -s dist/index.html
+      - name: Guard against fictitious live contract or unauthorized writes
+        run: |
+          grep -q "window.CONTRACT_ADDRESS=''" native/milestoneproof/web/index.html
+          grep -q "window.RELEASE_QUALIFIED=false" native/milestoneproof/web/index.html
