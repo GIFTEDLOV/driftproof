@@ -133,7 +133,7 @@ class MilestoneProof(gl.Contract):
             _fail('BAD_DEADLINE')
         recipient_hex = (recipient if isinstance(recipient, str) else recipient.as_hex).lower()
         _check_string(recipient_hex, 42)
-        if not (recipient_hex.startswith('0x') and len(recipient_hex)==42 and all(c in '0123456789abcdef' for c in recipient_hex[2:])) or recipient_hex==_sender():
+        if not (recipient_hex.startswith('0x') and len(recipient_hex)==42 and all(c in '0123456789abcdef' for c in recipient_hex[2:])) or recipient_hex in (_sender(), '0x'+'0'*40):
             _fail('BAD_CLIENT')
         if type(gross_minor) is not int or type(rate_num) is not int or type(rate_den) is not int:
             _fail('BAD_NUMERIC_TYPE')

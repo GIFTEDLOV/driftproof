@@ -138,7 +138,7 @@ class WarrantyLens(gl.Contract):
             _fail('INVALID_WARRANTY_WINDOW')
         recipient_hex = (recipient if isinstance(recipient, str) else recipient.as_hex).lower()
         _check_string(recipient_hex, 42)
-        if not (recipient_hex.startswith('0x') and len(recipient_hex)==42 and all(c in '0123456789abcdef' for c in recipient_hex[2:])) or recipient_hex==_sender():
+        if not (recipient_hex.startswith('0x') and len(recipient_hex)==42 and all(c in '0123456789abcdef' for c in recipient_hex[2:])) or recipient_hex in (_sender(), '0x'+'0'*40):
             _fail('BAD_RECIPIENT')
 
         attestor_hex = (attestor if isinstance(attestor, str) else attestor.as_hex).lower()
