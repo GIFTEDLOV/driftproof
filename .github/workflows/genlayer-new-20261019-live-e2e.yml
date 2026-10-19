@@ -1,0 +1,52 @@
+name: GenLayer Two New Contracts - Existing Deployments Three Actor E2E
+on:
+  push:
+    branches: [workbench/genlayer-new-warrantylens-milestoneproof-20261019]
+    paths: ['.github/workflows/genlayer-new-20261019-live-e2e.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: genlayer-new-20261019-qualified-once-${{ github.sha }}
+  cancel-in-progress: false
+jobs:
+  verify-then-run-signed-lifecycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 115
+    env:
+      WARRANTYLENS_ADDRESS: "0xebe45565311A00A148e4469dF38aC6aB73eFdb89"
+      MILESTONEPROOF_ADDRESS: "0xD4AdDBe785176EfC96da0B371FfBa03C5ff6c0c9"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Confirm network and exact deployed source before any signed write
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),crypto=require('crypto');
+          const want=[['warrantylens',process.env.WARRANTYLENS_ADDRESS,'229570fe0e8f1dda49fd30611853d19909adb03a41164646d47a4a1cfb6c308e'],['milestoneproof',process.env.MILESTONEPROOF_ADDRESS,'1b7a7424b4195ff6df0bd622aa9cdfce79aba2e49a05feb00a9385dafae8610b']];
+          async function rpc(method,params){const r=await fetch('https://studio.genlayer.com/api',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',method,params,id:1})});const j=await r.json();if(!r.ok||j.error)throw Error(JSON.stringify(j.error||r.status));return j.result;}
+          (async()=>{if(parseInt(await rpc('eth_chainId',[]),16)!==61999)throw Error('CHAIN_ID_MISMATCH');
+          for(const [app,address,wantSha] of want){const expected=crypto.createHash('sha256').update(fs.readFileSync('native/'+app+'/contracts/'+app+'.py')).digest('hex');
+            if(expected!==wantSha)throw Error(app+' SOURCE_CHECKOUT_MISMATCH');
+            const actual=crypto.createHash('sha256').update(Buffer.from(await rpc('gen_getContractCode',[address]),'base64')).digest('hex');
+            if(actual!==expected)throw Error(app+' LIVE_SOURCE_MISMATCH');
+            console.log('SOURCE_PARITY_PASS='+app+' '+address);
+          }})().catch(e=>{console.error(e);process.exitCode=1});
+          NODE
+      - name: Pin SDK and validate script
+        run: |
+          npm install --no-save --no-audit --no-fund genlayer-js@1.1.8
+          node --check native/genlayer_new_live_qualify.mjs
+      - name: Perform actual three-party signed lifecycle, freeze, attest, challenge and finalize
+        run: node native/genlayer_new_live_qualify.mjs
+      - name: Upload every sent hash and onchain state, success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genlayer-two-20261019-real-lifecycle-evidence
+          path: live-proof/*.json
+          retention-days: 30
+          if-no-files-found: warn
