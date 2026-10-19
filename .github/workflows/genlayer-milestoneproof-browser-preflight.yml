@@ -1,0 +1,29 @@
+name: MilestoneProof - Signed Browser Preflight Without Broadcast
+on:
+  push:
+    branches: [workbench/genlayer-new-warrantylens-milestoneproof-20261019]
+    paths: ['.github/workflows/genlayer-milestoneproof-browser-preflight.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Install genuine headless Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright
+          npx playwright install --with-deps chromium
+      - name: Exercise GenLayer browser signing path but reject before broadcast
+        run: node native/milestoneproof/browser_preflight_only.mjs
+      - name: Publish browser SDK method traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: milestoneproof-no-broadcast-browser-probe
+          path: browser-probe/*
+          retention-days: 30
+          if-no-files-found: warn
