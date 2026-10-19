@@ -1,0 +1,29 @@
+name: MilestoneProof - Production Browser Security and Canonical Registry
+on:
+  push:
+    branches: [workbench/genlayer-new-warrantylens-milestoneproof-20261019]
+    paths: ['.github/workflows/genlayer-milestoneproof-production-smoke.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Install Chromium and Playwright
+        run: |
+          npm install --no-save --no-audit --no-fund playwright
+          npx playwright install --with-deps chromium
+      - name: Verify live contract, registry, duplicate guard and wallet rejection without broadcasting
+        run: node native/milestoneproof/browser_production_smoke.mjs
+      - name: Publish production browser report and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: milestoneproof-production-browser-security-smoke
+          path: production-smoke/*
+          retention-days: 30
+          if-no-files-found: warn
