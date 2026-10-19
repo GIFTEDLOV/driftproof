@@ -48,8 +48,14 @@ jobs:
           npm run check
           npm run build
           test -s dist/index.html
-      - name: Guard against fictitious live contract or unauthorized writes
+      - name: Verify the live binding and qualified release flag
         run: |
-          grep -q "window.CONTRACT_ADDRESS=''" native/milestoneproof/web/index.html
-          grep -q "window.RELEASE_QUALIFIED=true" native/milestoneproof/web/index.html
-          grep -q "window.CONTRACT_ADDRESS=\x270xD4AdDBe785176EfC96da0B371FfBa03C5ff6c0c9\x27" native/milestoneproof/web/index.html
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const html=fs.readFileSync('native/milestoneproof/web/index.html','utf8');
+          const address='0xD4AdDBe785176EfC96da0B371FfBa03C5ff6c0c9';
+          if(!html.includes(`window.CONTRACT_ADDRESS='${address}'`))throw Error('Live Studionet contract binding does not match the source-verified deployment');
+          if(!html.includes('window.RELEASE_QUALIFIED=true'))throw Error('Release flag is not enabled as independently qualified');
+          if(html.includes("window.CONTRACT_ADDRESS=''")||html.includes('CANDIDATE · NOT LIVE'))throw Error('Stale prerelease UI');
+          console.log('LIVE_FRONTEND_BINDING_AND_RELEASE_GATE_PASS');
+          NODE
