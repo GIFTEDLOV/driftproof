@@ -1,0 +1,29 @@
+name: GenLayer Two New - Read-Only Transaction Reconciliation
+on:
+  push:
+    branches: [workbench/genlayer-new-warrantylens-milestoneproof-20261019]
+    paths: ['.github/workflows/genlayer-new-read-only-reconcile.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install pinned SDK
+        run: npm install --no-save --no-audit --no-fund genlayer-js@1.1.8
+      - name: Read historic tx receipts and canonical case state; NO writes
+        run: node native/genlayer_new_read_only_reconcile.mjs
+      - name: Preserve read-only reconciliation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genlayer-new-read-only-reconciliation
+          path: read-only-proof/*.json
+          retention-days: 30
+          if-no-files-found: warn
