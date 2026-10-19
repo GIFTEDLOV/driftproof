@@ -1,0 +1,51 @@
+name: WarrantyLens - Guarded Fresh Live Qualification
+on:
+  push:
+    branches: [workbench/genlayer-new-warrantylens-milestoneproof-20261019]
+    paths: ['.github/workflows/genlayer-warrantylens-fresh-live.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+concurrency:
+  group: warrantylens-fresh-qa-once-20261019
+  cancel-in-progress: false
+jobs:
+  signed-warrantylens-lifecycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      WARRANTYLENS_ADDRESS: '0xebe45565311A00A148e4469dF38aC6aB73eFdb89'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Check chain, source byte-for-byte, and no duplicate broadcast
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),crypto=require('crypto');
+          (async()=>{
+            const original=fs.readFileSync('native/warrantylens/contracts/warrantylens.py');
+            const expected='229570fe0e8f1dda49fd30611853d19909adb03a41164646d47a4a1cfb6c308e';
+            if(crypto.createHash('sha256').update(original).digest('hex')!==expected)throw Error('SOURCE_CHANGED');
+            async function rpc(method,params){const r=await fetch('https://studio.genlayer.com/api',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',method,params,id:1})});const j=await r.json();if(j.error||!r.ok)throw Error(JSON.stringify(j.error||r.status));return j.result}
+            if(parseInt(await rpc('eth_chainId',[]),16)!==61999)throw Error('WRONG_CHAIN');
+            const installed=Buffer.from(await rpc('gen_getContractCode',[process.env.WARRANTYLENS_ADDRESS]),'base64');
+            if(crypto.createHash('sha256').update(installed).digest('hex')!==expected)throw Error('INSTALLED_SOURCE_MISMATCH');
+            console.log('WARRANTYLENS_INSTALLED_SOURCE_PASS');
+          })().catch(e=>{console.error(e);process.exitCode=1});
+          NODE
+      - name: Install pinned GenLayer SDK
+        run: |
+          npm install --no-save --no-audit --no-fund genlayer-js@1.1.8
+          node --check native/warrantylens_fresh_live_qualify.mjs
+      - name: Single fresh three-party E2E with transaction log checkpointing
+        run: node native/warrantylens_fresh_live_qualify.mjs
+      - name: Publish receipts and canonical state even on nonfinal execution
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: warrantylens-fresh-actual-genvm-qualification
+          path: live-proof/*.json
+          if-no-files-found: warn
+          retention-days: 30
