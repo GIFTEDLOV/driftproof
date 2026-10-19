@@ -1,0 +1,58 @@
+{
+  "app": "MilestoneProof",
+  "caseId": "BROWSERLIVE-39242842521-MilestoneProof",
+  "contract": "0xD4AdDBe785176EfC96da0B371FfBa03C5ff6c0c9",
+  "chainId": 61999,
+  "creator": "0x0250B7D32776Ff469e417423e0508a7F1A9Db8a2",
+  "phase": "SIGNED_GENVM_SUCCESS_AND_CANONICAL_CASE_PASS",
+  "signed": true,
+  "noKeyPersisted": true,
+  "transactions": [
+    {
+      "method": "create_case",
+      "expectedRawHash": "0xb925d74b7ba9b6cc065bd52b697946aecca468b531eea5b1ccccaf9b50519950",
+      "phase": "BROADCAST_NO_FINALITY",
+      "txType": "legacy",
+      "nonce": 0,
+      "gas": "500000",
+      "hash": "0xb925d74b7ba9b6cc065bd52b697946aecca468b531eea5b1ccccaf9b50519950"
+    }
+  ],
+  "at": "2026-10-19T11:12:08.897Z",
+  "formCheck": {
+    "to": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "att": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "id": "BROWSERLIVE-39242842521-MilestoneProof",
+    "toLength": 42,
+    "attLength": 42,
+    "validTo": true,
+    "validAtt": true,
+    "distinct": true
+  },
+  "checkedOuterRecipient": "0xb7278A61aa25c888815aFC32Ad3cC52fF24fE575",
+  "targetInCalldata": true,
+  "browserOutput": "{\n  \"status\": \"VERIFIED_FINALIZED_EXECUTION_AND_STATE\",\n  \"transaction\": \"0xb925d74b7ba9b6cc065bd52b697946aecca468b531eea5b1ccccaf9b50519950\",\n  \"action\": \"create_case\",\n  \"case\": {\n    \"attestation_hash\": \"\",\n    \"attested\": false,\n    \"attestor\": \"0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\n    \"budget_type\": \"NON_CUSTODIAL_MINOR_UNITS\",\n    \"challenge_hash\": \"\",\n    \"challenge_text\": \"\",\n    \"challenges\": [],\n    \"consented\": false,\n    \"created\": 1792408332,\n    \"creator\": \"0x0250b7d32776ff469e417423e0508a7f1a9db8a2\",\n    \"deadline\": 1792494732,\n    \"evidence\": \"\",\n    \"evidence_hash\": \"\",\n    \"finalized_at\": 0,\n    \"gross_minor\": 250001,\n    \"id\": \"BROWSERLIVE-39242842521-MilestoneProof\",\n    \"last_at\": 0,\n    \"milestone_kind\": \"DELIVERABLE_ACCEPTANCE\",\n    \"payable_minor\": 0,\n    \"p",
+  "txLifecycle": "FINALIZED",
+  "genVM": {
+    "status": "FINALIZED",
+    "consensus": "MAJORITY_AGREE",
+    "leaders": [
+      {
+        "result": "SUCCESS",
+        "stderr": ""
+      },
+      {
+        "result": "SUCCESS",
+        "stderr": ""
+      }
+    ]
+  },
+  "canonicalState": {
+    "id": "BROWSERLIVE-39242842521-MilestoneProof",
+    "status": "DRAFT",
+    "creator": "0x0250b7d32776ff469e417423e0508a7f1a9db8a2",
+    "recipient": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "attestor": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "productionAppReceiptStatus": "{\n  \"status\": \"VERIFIED_FINALIZED_EXECUTION_AND_STATE\",\n  \"transaction\": \"0xb925d74b7ba9b6cc065bd52b697946aecca468b531eea5b1ccccaf9b50519950\",\n  \"action\": \"create_case\",\n  \"case\": {\n    \"attestation_hash\": \"\",\n    \"attested\": false,\n    \"attestor\": \""
+}

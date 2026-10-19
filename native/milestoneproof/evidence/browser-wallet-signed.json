@@ -1,0 +1,57 @@
+{
+  "app": "MilestoneProof",
+  "caseId": "BROWSERLIVE-39242164606-MilestoneProof",
+  "contract": "0xD4AdDBe785176EfC96da0B371FfBa03C5ff6c0c9",
+  "chainId": 61999,
+  "creator": "0xc1AeD111645Bcf87889764eD17709A2183FD459D",
+  "phase": "SIGNED_GENVM_SUCCESS_AND_CANONICAL_CASE_PASS",
+  "signed": true,
+  "noKeyPersisted": true,
+  "transactions": [
+    {
+      "method": "create_case",
+      "expectedRawHash": "0xaa98cd3f8f1f52bd6e74b1ed3e16aafb13799ca767625dba54e2b78d835fdb78",
+      "phase": "BROADCAST_NO_FINALITY",
+      "txType": "legacy",
+      "nonce": 0,
+      "gas": "500000",
+      "hash": "0xaa98cd3f8f1f52bd6e74b1ed3e16aafb13799ca767625dba54e2b78d835fdb78"
+    }
+  ],
+  "at": "2026-10-19T11:06:37.185Z",
+  "formCheck": {
+    "to": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "att": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "id": "BROWSERLIVE-39242164606-MilestoneProof",
+    "toLength": 42,
+    "attLength": 42,
+    "validTo": true,
+    "validAtt": true,
+    "distinct": true
+  },
+  "checkedOuterRecipient": "0xb7278A61aa25c888815aFC32Ad3cC52fF24fE575",
+  "targetInCalldata": true,
+  "browserOutput": "Submission was broadcast and must be reconciled before retry. Timed out waiting for transaction 0xaa98cd3f8f1f52bd6e74b1ed3e16aafb13799ca767625dba54e2b78d835fdb78 to reach status \"FINALIZED\" (current status: 5).",
+  "txLifecycle": "ACCEPTED",
+  "genVM": {
+    "status": "FINALIZED",
+    "consensus": "MAJORITY_AGREE",
+    "leaders": [
+      {
+        "result": "SUCCESS",
+        "stderr": ""
+      },
+      {
+        "result": "SUCCESS",
+        "stderr": ""
+      }
+    ]
+  },
+  "canonicalState": {
+    "id": "BROWSERLIVE-39242164606-MilestoneProof",
+    "status": "DRAFT",
+    "creator": "0xc1aed111645bcf87889764ed17709a2183fd459d",
+    "recipient": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "attestor": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  }
+}

@@ -51,4 +51,5 @@ jobs:
       - name: Guard against fictitious live contract or unauthorized writes
         run: |
           grep -q "window.CONTRACT_ADDRESS=''" native/milestoneproof/web/index.html
-          grep -q "window.RELEASE_QUALIFIED=false" native/milestoneproof/web/index.html
+          grep -q "window.RELEASE_QUALIFIED=true" native/milestoneproof/web/index.html
+          grep -q "window.CONTRACT_ADDRESS=\x270xD4AdDBe785176EfC96da0B371FfBa03C5ff6c0c9\x27" native/milestoneproof/web/index.html

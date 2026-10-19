@@ -1,0 +1,304 @@
+{
+  "slug": "milestoneproof",
+  "contract": "0xD4AdDBe785176EfC96da0B371FfBa03C5ff6c0c9",
+  "id": "GNEW-milestoneproof-39238668302",
+  "chainId": 61999,
+  "sourceKind": "SYNTHETIC_TEST_ONLY",
+  "status": "PASS",
+  "txs": [
+    {
+      "method": "create_case",
+      "hash": "0xc57a08203925172bdfa02c4b2088ca68cc79daec8c6904c6bba50779a20f3ff7",
+      "phase": "FINALIZED",
+      "consensus": "MAJORITY_AGREE",
+      "leaders": [
+        {
+          "result": "SUCCESS",
+          "stderr": ""
+        },
+        {
+          "result": "ERROR",
+          "stderr": "Validator execution cancelled after quorum"
+        }
+      ],
+      "verified": {
+        "status": "DRAFT",
+        "round": 0,
+        "result": "",
+        "consented": false,
+        "attested": false,
+        "attestor": "0x11f16c68d5986c898569ade6f43fb14956b4a732",
+        "challenge_count": 0,
+        "finalized_at": 0,
+        "payable_minor": 0,
+        "provisional_payable_minor": 0
+      }
+    },
+    {
+      "method": "consent",
+      "hash": "0xe0ad9dc02c6d391ebc022e48029d904ffa014feef606538ecd251f06c6dc47b8",
+      "phase": "FINALIZED",
+      "consensus": "MAJORITY_AGREE",
+      "leaders": [
+        {
+          "result": "SUCCESS",
+          "stderr": ""
+        },
+        {
+          "result": "SUCCESS",
+          "stderr": ""
+        }
+      ],
+      "verified": {
+        "status": "DRAFT",
+        "round": 0,
+        "result": "",
+        "consented": true,
+        "attested": false,
+        "attestor": "0x11f16c68d5986c898569ade6f43fb14956b4a732",
+        "challenge_count": 0,
+        "finalized_at": 0,
+        "payable_minor": 0,
+        "provisional_payable_minor": 0
+      }
+    },
+    {
+      "method": "freeze",
+      "hash": "0x7c9aa11ef0a3946b5b7d482ef65435a72c5ae69f093311634e10944688d8c9c4",
+      "phase": "FINALIZED",
+      "consensus": "MAJORITY_AGREE",
+      "leaders": [
+        {
+          "result": "SUCCESS",
+          "stderr": ""
+        },
+        {
+          "result": "ERROR",
+          "stderr": "Validator execution cancelled after quorum"
+        }
+      ],
+      "verified": {
+        "status": "FROZEN",
+        "round": 0,
+        "result": "",
+        "consented": true,
+        "attested": false,
+        "attestor": "0x11f16c68d5986c898569ade6f43fb14956b4a732",
+        "challenge_count": 0,
+        "finalized_at": 0,
+        "payable_minor": 0,
+        "provisional_payable_minor": 0
+      }
+    },
+    {
+      "method": "submit_evidence",
+      "hash": "0x7f461009b635c832754ff5e1995a5abde509cdbb763d1c62089e6a1f99c08c26",
+      "phase": "FINALIZED",
+      "consensus": "MAJORITY_AGREE",
+      "leaders": [
+        {
+          "result": "SUCCESS",
+          "stderr": ""
+        },
+        {
+          "result": "SUCCESS",
+          "stderr": ""
+        }
+      ],
+      "verified": {
+        "status": "EVIDENCE_LOCKED",
+        "round": 0,
+        "result": "",
+        "consented": true,
+        "attested": false,
+        "attestor": "0x11f16c68d5986c898569ade6f43fb14956b4a732",
+        "challenge_count": 0,
+        "finalized_at": 0,
+        "payable_minor": 0,
+        "provisional_payable_minor": 0
+      }
+    },
+    {
+      "method": "attest_evidence",
+      "hash": "0xba8af4b4716217c411c10ed5bf2def4d0030d394be840444b8a360186aa02775",
+      "phase": "FINALIZED",
+      "consensus": "MAJORITY_AGREE",
+      "leaders": [
+        {
+          "result": "SUCCESS",
+          "stderr": ""
+        },
+        {
+          "result": "SUCCESS",
+          "stderr": ""
+        }
+      ],
+      "verified": {
+        "status": "ATTESTED",
+        "round": 0,
+        "result": "",
+        "consented": true,
+        "attested": true,
+        "attestor": "0x11f16c68d5986c898569ade6f43fb14956b4a732",
+        "challenge_count": 0,
+        "finalized_at": 0,
+        "payable_minor": 0,
+        "provisional_payable_minor": 0
+      }
+    },
+    {
+      "method": "adjudicate",
+      "hash": "0x03d8502608e87c6129dd870895fd4eb4ec27e7b3568354bade5be240c3f9304a",
+      "phase": "FINALIZED",
+      "consensus": "MAJORITY_AGREE",
+      "leaders": [
+        {
+          "result": "SUCCESS",
+          "stderr": ""
+        },
+        {
+          "result": "SUCCESS",
+          "stderr": ""
+        }
+      ],
+      "verified": {
+        "status": "ASSESSED",
+        "round": 1,
+        "result": "REVIEW_REQUIRED",
+        "consented": true,
+        "attested": true,
+        "attestor": "0x11f16c68d5986c898569ade6f43fb14956b4a732",
+        "challenge_count": 0,
+        "finalized_at": 0,
+        "payable_minor": 0,
+        "provisional_payable_minor": 0
+      }
+    },
+    {
+      "method": "challenge",
+      "hash": "0x567c1a321c0c37c57c35ad926c68ccbc2185bdce81ebdd28f556b09b7cc4c455",
+      "phase": "FINALIZED",
+      "consensus": "MAJORITY_AGREE",
+      "leaders": [
+        {
+          "result": "SUCCESS",
+          "stderr": ""
+        },
+        {
+          "result": "SUCCESS",
+          "stderr": ""
+        }
+      ],
+      "verified": {
+        "status": "CHALLENGED",
+        "round": 1,
+        "result": "REVIEW_REQUIRED",
+        "consented": true,
+        "attested": true,
+        "attestor": "0x11f16c68d5986c898569ade6f43fb14956b4a732",
+        "challenge_count": 1,
+        "finalized_at": 0,
+        "payable_minor": 0,
+        "provisional_payable_minor": 0
+      }
+    },
+    {
+      "method": "challenge",
+      "hash": "0xd4686fad98759b0299e4b7eb945c1a4acbdc27fb2ce2d81364b0d5fca4f54ad5",
+      "phase": "FINALIZED",
+      "consensus": "MAJORITY_AGREE",
+      "leaders": [
+        {
+          "result": "SUCCESS",
+          "stderr": ""
+        },
+        {
+          "result": "ERROR",
+          "stderr": "Validator execution cancelled after quorum"
+        }
+      ],
+      "verified": {
+        "status": "CHALLENGED",
+        "round": 1,
+        "result": "REVIEW_REQUIRED",
+        "consented": true,
+        "attested": true,
+        "attestor": "0x11f16c68d5986c898569ade6f43fb14956b4a732",
+        "challenge_count": 2,
+        "finalized_at": 0,
+        "payable_minor": 0,
+        "provisional_payable_minor": 0
+      }
+    },
+    {
+      "method": "adjudicate",
+      "hash": "0x334e01ea1e4f6e69c74e19e3a3e0302847f574db70b85cfa34a20e62839fb4e4",
+      "phase": "FINALIZED",
+      "consensus": "MAJORITY_AGREE",
+      "leaders": [
+        {
+          "result": "SUCCESS",
+          "stderr": ""
+        },
+        {
+          "result": "SUCCESS",
+          "stderr": ""
+        }
+      ],
+      "verified": {
+        "status": "ASSESSED",
+        "round": 2,
+        "result": "REVIEW_REQUIRED",
+        "consented": true,
+        "attested": true,
+        "attestor": "0x11f16c68d5986c898569ade6f43fb14956b4a732",
+        "challenge_count": 2,
+        "finalized_at": 0,
+        "payable_minor": 0,
+        "provisional_payable_minor": 0
+      }
+    },
+    {
+      "method": "finalize_case",
+      "hash": "0xdc9b05ff3de393a708a41b4ff0926bdf5be997b4c118fc11f5f3c69834c45589",
+      "phase": "FINALIZED",
+      "consensus": "MAJORITY_AGREE",
+      "leaders": [
+        {
+          "result": "SUCCESS",
+          "stderr": ""
+        },
+        {
+          "result": "SUCCESS",
+          "stderr": ""
+        }
+      ],
+      "verified": {
+        "status": "FINALIZED",
+        "round": 2,
+        "result": "REVIEW_REQUIRED",
+        "consented": true,
+        "attested": true,
+        "attestor": "0x11f16c68d5986c898569ade6f43fb14956b4a732",
+        "challenge_count": 2,
+        "finalized_at": 1792406843,
+        "payable_minor": 0,
+        "provisional_payable_minor": 0
+      }
+    }
+  ],
+  "verdict": "REVIEW_REQUIRED",
+  "final": {
+    "status": "FINALIZED",
+    "round": 2,
+    "result": "REVIEW_REQUIRED",
+    "consented": true,
+    "attested": true,
+    "attestor": "0x11f16c68d5986c898569ade6f43fb14956b4a732",
+    "challenge_count": 2,
+    "finalized_at": 1792406843,
+    "payable_minor": 0,
+    "provisional_payable_minor": 0
+  },
+  "historyLength": 2
+}

@@ -3,7 +3,7 @@ import { studionet } from "genlayer-js/chains";
 import { TransactionStatus } from "genlayer-js/types";
 
 // Separate immutable deploy-and-audit binding from UI's ability to sign.
-// RELEASE_QUALIFIED is false until independent GenVM and signed browser E2E evidence exists.
+// RELEASE_QUALIFIED is true only after verified live consensus, signed browser E2E and canonical readback.
 const ADDRESS = window.CONTRACT_ADDRESS;
 const BOUND = /^0x[a-fA-F0-9]{40}$/.test(ADDRESS ?? "");
 const QUALIFIED = window.RELEASE_QUALIFIED === true && BOUND;
@@ -27,7 +27,7 @@ const currentTxStorage=()=>`genlayer-pending-${ADDRESS?.toLowerCase()||'unset'}`
 const txSaved=()=>{try{return JSON.parse(window.localStorage.getItem(currentTxStorage())||"null")}catch{return null}};
 const txRemember=v=>{try{if(v)window.localStorage.setItem(currentTxStorage(),JSON.stringify(v));else window.localStorage.removeItem(currentTxStorage())}catch{}};
 async function afterTx(saved){
-  const persisted=await reader.waitForTransactionReceipt({hash:saved.hash,status:TransactionStatus.FINALIZED,fullTransaction:false});
+  const persisted=await reader.waitForTransactionReceipt({hash:saved.hash,status:TransactionStatus.FINALIZED,fullTransaction:false,interval:4000,retries:100});
   const leaders=persisted?.consensus_data?.leader_receipt||[];
   const phase=persisted?.status_name??persisted?.statusName;
   // GenVM execution and canonical state matter, not majority agreement alone.
