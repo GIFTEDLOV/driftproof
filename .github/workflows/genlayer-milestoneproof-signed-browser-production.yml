@@ -1,0 +1,48 @@
+name: MilestoneProof - Final Public Production Signed Browser Qualification
+on:
+  push:
+    branches: [workbench/genlayer-new-warrantylens-milestoneproof-20261019]
+    paths: ['.github/workflows/genlayer-milestoneproof-signed-browser-production.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+concurrency:
+  group: milestoneproof-one-real-browser-sign-production-20261019
+  cancel-in-progress: false
+jobs:
+  sign-submit-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Confirm source byte parity to original verified deployed contract
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const crypto=require('crypto'),fs=require('fs');
+          const address='0xD4AdDBe785176EfC96da0B371FfBa03C5ff6c0c9';
+          const expect='1b7a7424b4195ff6df0bd622aa9cdfce79aba2e49a05feb00a9385dafae8610b';
+          (async()=>{
+            if(crypto.createHash('sha256').update(fs.readFileSync('native/milestoneproof/contracts/milestoneproof.py')).digest('hex')!==expect)throw Error('SOURCE_CHECKOUT_MISMATCH');
+            const resp=await fetch('https://studio.genlayer.com/api',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'gen_getContractCode',params:[address]})});const j=await resp.json();
+            if(!resp.ok||j.error)throw Error('RPC '+JSON.stringify(j.error||resp.status));
+            if(crypto.createHash('sha256').update(Buffer.from(j.result,'base64')).digest('hex')!==expect)throw Error('ONCHAIN_BYTE_PARITY_FAIL');
+            console.log('ORIGINAL_CONTRACT_SOURCE_PARITY_PASS');
+          })().catch(e=>{console.error(e);process.exitCode=1});
+          NODE
+      - name: Real Chromium and pinned GenLayerJS wallet SDK
+        run: |
+          npm install --no-save --no-audit --no-fund playwright viem genlayer-js@1.1.8
+          npx playwright install --with-deps chromium
+          node --check native/milestoneproof/browser_signed_milestoneproof_prod.mjs
+      - name: Sign correct outer GenLayer consensus router TX with bound target, no replay
+        run: node native/milestoneproof/browser_signed_milestoneproof_prod.mjs
+      - name: Upload hash checkpoints, GenVM execution and canonical readback
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: milestoneproof-production-real-browser-signed-qualification
+          path: browser-signed-proof/*
+          if-no-files-found: warn
+          retention-days: 30
