@@ -1,0 +1,109 @@
+name: GenLayer Two New Contracts - One Shot Studionet Deployment
+on:
+  push:
+    branches: [workbench/genlayer-new-warrantylens-milestoneproof-20261019]
+    paths: ['.github/workflows/genlayer-new-20261019-deploy.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: genlayer-warrantylens-milestoneproof-one-shot-20261019
+  cancel-in-progress: false
+jobs:
+  validated-first-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Compile and GenVM-lint the exact deployed sources first
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check pytest genvm-linter
+          python -m pytest -q --import-mode=importlib native/warrantylens/tests native/milestoneproof/tests
+          for app in warrantylens milestoneproof; do
+            python -m py_compile "native/$app/contracts/$app.py"
+            genvm-lint check "native/$app/contracts/$app.py"
+            genvm-lint schema "native/$app/contracts/$app.py" --json > "/tmp/$app-schema.json"
+            test -s "/tmp/$app-schema.json"
+          done
+      - name: Validate canonical Studionet network and CLI
+        run: |
+          set -euo pipefail
+          npm install --global genlayer
+          genlayer network set studionet
+          genlayer network info
+          node <<'NODE'
+          (async()=>{
+            const r=await fetch('https://studio.genlayer.com/api',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',method:'eth_chainId',params:[],id:1})});
+            const x=await r.json();
+            if(!r.ok||x.error||parseInt(x.result,16)!==61999)throw Error('Wrong or unavailable Studionet chain '+JSON.stringify(x));
+            console.log('CHAIN_61999_PRECHECK_PASS');
+          })().catch(e=>{console.error(e);process.exitCode=1});
+          NODE
+      - name: Create isolated temporary deployment signer; mask its password
+        run: |
+          set -euo pipefail
+          PASS="$(openssl rand -hex 32)"
+          echo "::add-mask::$PASS"
+          echo "DEPLOY_SIGNER_PASSWORD=$PASS" >> "$GITHUB_ENV"
+          genlayer account create --name gltwo-20261019 --password "$PASS" > /dev/null
+          genlayer account use gltwo-20261019 >/dev/null
+      - name: One-time deploy, no tx replays, immediate transaction preservation
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p live-proof
+          for app in warrantylens milestoneproof; do
+            contract="native/$app/contracts/$app.py"
+            echo "DEPLOYING $app"
+            if ! printf '%s\n' "$DEPLOY_SIGNER_PASSWORD" | genlayer deploy --contract "$contract" >"live-proof/$app.log" 2>&1;then
+              echo "DEPLOY_FAILED_$app -- NO AUTOMATIC RETRY"
+              grep -Ei 'error|fail|invalid' "live-proof/$app.log" | cut -c 1-240 | tail -n 8 || true
+              exit 1
+            fi
+            APP="$app" node <<'NODE'
+          const fs=require('fs'),crypto=require('crypto'),app=process.env.APP;
+          const log=fs.readFileSync(`live-proof/${app}.log`,'utf8');
+          const transactionHash=[...log.matchAll(/'Transaction Hash':\s*'(0x[a-fA-F0-9]{64})'/g)].at(-1)?.[1]||null;
+          const address=[...log.matchAll(/'Contract Address':\s*'(0x[a-fA-F0-9]{40})'/g)].at(-1)?.[1]||null;
+          const executionSuccess=/execution_result:\s*'SUCCESS'/.test(log);
+          const cliSuccess=/Contract deployed successfully/i.test(log);
+          const source=fs.readFileSync(`native/${app}/contracts/${app}.py`);
+          const proof={app,address,transactionHash,chainId:61999,sourceSha256:crypto.createHash('sha256').update(source).digest('hex'),executionSuccess,cliSuccess,commit:process.env.GITHUB_SHA};
+          fs.writeFileSync(`live-proof/${app}.json`,JSON.stringify(proof,null,2));
+          console.log(JSON.stringify(proof));
+          if(!(transactionHash&&address&&executionSuccess&&cliSuccess))process.exit(1);
+          NODE
+            sleep 3
+          done
+      - name: Independently fetch installed source from canonical RPC and compare bytes
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),crypto=require('crypto');
+          (async()=>{
+            for(const app of ['warrantylens','milestoneproof']){
+              const file=`live-proof/${app}.json`,p=JSON.parse(fs.readFileSync(file,'utf8'));
+              const r=await fetch('https://studio.genlayer.com/api',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',method:'gen_getContractCode',params:[p.address],id:1})});
+              const d=await r.json();
+              if(!r.ok||d.error||typeof d.result!=='string')throw Error(app+' code query unavailable: '+JSON.stringify(d.error||r.status));
+              p.installedSourceSha256=crypto.createHash('sha256').update(Buffer.from(d.result,'base64')).digest('hex');
+              p.sourceParity=p.installedSourceSha256===p.sourceSha256?'PASS':'FAIL';
+              fs.writeFileSync(file,JSON.stringify(p,null,2));
+              console.log(app,'SOURCE_PARITY',p.sourceParity,'ADDRESS',p.address);
+              if(p.sourceParity!=='PASS')throw Error(app+' DEPLOYED_BYTE_MISMATCH');
+            }
+          })().catch(e=>{console.error(e);process.exitCode=1});
+          NODE
+      - name: Retain public deployment proof even after failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genlayer-two-new-20261019-public-deploy-evidence
+          path: live-proof/*.json
+          retention-days: 30
+          if-no-files-found: warn
